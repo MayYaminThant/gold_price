@@ -11,14 +11,13 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        key: MainPage().scaffoldKey,
-        appBar: appBar(),
+        key: widget.scaffoldKey,
+        appBar: appBar(widget.scaffoldKey),
         body: mainPageBody(context),
         drawer: const Drawer(),
       ),
@@ -41,16 +40,15 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  AppBar appBar() {
+  AppBar appBar(GlobalKey<ScaffoldState> scaffoldKey) {
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0, // removing the drop shadow
       leading: IconButton(
         onPressed: () {
-          // if (MainPage().scaffoldKey.currentState != null) {
-          //   _openEndDrawer();
-          // }
-          Scaffold.of(context).openDrawer();
+          if (scaffoldKey.currentState != null) {
+            scaffoldKey.currentState!.openDrawer();
+          }
         },
         icon: const Icon(
           Icons.menu,
