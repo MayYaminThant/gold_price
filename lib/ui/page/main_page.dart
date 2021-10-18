@@ -19,7 +19,7 @@ class _MainPageState extends State<MainPage> {
         key: widget.scaffoldKey,
         appBar: appBar(widget.scaffoldKey),
         body: mainPageBody(context),
-        drawer: const Drawer(),
+        endDrawer: _drawerLayout(),
       ),
     );
   }
@@ -44,17 +44,19 @@ class _MainPageState extends State<MainPage> {
     return AppBar(
       backgroundColor: Colors.white,
       elevation: 0, // removing the drop shadow
-      leading: IconButton(
-        onPressed: () {
-          if (scaffoldKey.currentState != null) {
-            scaffoldKey.currentState!.openDrawer();
-          }
-        },
-        icon: const Icon(
-          Icons.menu,
-          color: Colors.black,
+      actions: [
+        IconButton(
+          onPressed: () {
+            if (scaffoldKey.currentState != null) {
+              scaffoldKey.currentState!.openEndDrawer();
+            }
+          },
+          icon: const Icon(
+            Icons.menu,
+            color: Colors.black,
+          ),
         ),
-      ),
+      ],
       title: const Center(
         child: Text('နောက်ဆုံးရ ရွှေစျေးနှုန်းများ'),
       ),
@@ -346,3 +348,54 @@ class _MainPageState extends State<MainPage> {
     );
   }
 }
+
+class RightDrawerClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    Path path = Path();
+
+    path.moveTo(50, 0);
+    path.quadraticBezierTo(0, size.height / 2, 50, size.height);
+    // path.lineTo(0, size.height / 2);
+    // path.lineTo(50, size.height);
+    path.lineTo(size.width, size.height);
+    path.lineTo(size.width, 0);
+
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) {
+    return false;
+  }
+}
+
+class LeftDrawerClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    Path path = Path();
+
+    path.moveTo(0, 50);
+    // path.quadraticBezierTo(0, size.height / 3, 30, size.height);
+    path.lineTo(0, 50);
+    path.lineTo(50, size.height);
+    path.lineTo(size.width, size.height / 2);
+    path.lineTo(size.width, 50);
+
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) {
+    return false;
+  }
+}
+
+ClipPath _drawerLayout() => ClipPath(
+      clipper: RightDrawerClipper(),
+      child: Drawer(
+        child: Container(
+          color: Colors.grey,
+        ),
+      ),
+    );
