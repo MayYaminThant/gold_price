@@ -1,10 +1,14 @@
-import '../../controller/gold_type_controller.dart';
+import 'package:firebase_core/firebase_core.dart';
+
+import 'controller/gold_shop_controller.dart';
 import 'ui/page/main_page.dart';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
@@ -15,7 +19,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => GoldTypeController(0)),
+        ChangeNotifierProvider(create: (_) => GoldShopController(0)),
       ],
       child: const MaterialAppWidget(),
     );

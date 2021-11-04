@@ -1,13 +1,29 @@
-// import 'package:flutter/material.dart';
+import 'dart:core';
 
-// class Gold {
-//   final int id;
-//   final String goldShop;
-// }
+class Gold {
+  final String id;
+  final String name;
+  final String imageUrl;
+  final String goldShopPassword;
+  final String sixteenPrice;
+  final String fifteenPrice;
+  final String phoneNo;
+  final String website;
+  final String facebook;
+  final String createdDate;
+  final String modifiedDate;
 
-// {
-//   'id': 1,
-//   'shopName': 'Aung ThaMarDee',
-//   'shopImage' : '',
-//   'price': 2000000,
-// }
+  Gold({
+    required this.id,
+    required this.name,
+    required this.imageUrl,
+    required this.goldShopPassword,
+    required this.sixteenPrice,
+    required this.fifteenPrice,
+    required this.phoneNo,
+    required this.website,
+    required this.facebook,
+    required this.createdDate,
+    required this.modifiedDate,
+  });
+}

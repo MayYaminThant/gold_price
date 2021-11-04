@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "50125092539",
+    "project_id": "gold-price-e1fa9",
+    "storage_bucket": "gold-price-e1fa9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:50125092539:android:52f5bd79876dcacca11b9e",
+        "android_client_info": {
+          "package_name": "com.example.gold_price"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "50125092539-9qc24g9s1fgggtdsb2vlo2perb3iptkr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqFBwF21IOmCgPR6uj8JUGIcG4AFQD7-U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "50125092539-9qc24g9s1fgggtdsb2vlo2perb3iptkr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

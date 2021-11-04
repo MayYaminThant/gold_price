@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:gold_price/common/common_widget.dart';
+import 'package:gold_price/controller/gold_shop_controller.dart';
+import 'package:gold_price/model/gold.dart';
+import 'package:gold_price/util/common_util.dart';
 import 'package:gold_price/util/screen_util.dart';
+import 'package:provider/provider.dart';
 
 class MainPage extends StatefulWidget {
   MainPage({Key? key}) : super(key: key);
@@ -13,14 +17,14 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        key: widget.scaffoldKey,
-        appBar: appBar(widget.scaffoldKey),
-        body: mainPageBody(context),
-        endDrawer: _drawerLayout(),
-      ),
+    CommonUtil.doInFuture(() {
+      context.read<GoldShopController>().getGoldShopData();
+    });
+    return Scaffold(
+      key: widget.scaffoldKey,
+      appBar: appBar(widget.scaffoldKey),
+      body: mainPageBody(context),
+      endDrawer: _drawerLayout(),
     );
   }
 
@@ -64,32 +68,6 @@ class _MainPageState extends State<MainPage> {
         color: Colors.black,
         fontSize: 20,
       ),
-      // bottom: TabBar(
-      //   labelColor: Colors.black,
-      //   unselectedLabelColor: Colors.black54,
-      //   indicator: MaterialIndicator(
-      //     height: 5,
-      //     topLeftRadius: 0,
-      //     topRightRadius: 0,
-      //     bottomLeftRadius: 5,
-      //     bottomRightRadius: 5,
-      //     horizontalPadding: 25,
-      //   ),
-      //   tabs: const [
-      //     Tab(
-      //       child: Text(
-      //         '16 ပဲရည်',
-      //         style: TextStyle(fontSize: 14.6),
-      //       ),
-      //     ),
-      //     Tab(
-      //       child: Text(
-      //         '15 ပဲရည်',
-      //         style: TextStyle(fontSize: 14.6),
-      //       ),
-      //     ),
-      //   ],
-      // ),
     );
   }
 
@@ -104,133 +82,70 @@ class _MainPageState extends State<MainPage> {
         mainAxisSpacing: 10.0,
         childAspectRatio: (itemWidth / itemHeight),
         shrinkWrap: true,
-        children: List.generate(
-          10,
-          (index) =>
-              // Container(
-              //   height: itemHeight,
-              //   width: itemWidth,
-              //   alignment: Alignment.center,
-              //   decoration: BoxDecoration(
-              //     shape: BoxShape.rectangle,
-              //     borderRadius:
-              //         const BorderRadius.all(Radius.elliptical(10.0, 20.0)),
-              //     color: Colors.grey.withOpacity(0.1),
-              //   ),
-              //   margin: const EdgeInsets.all(10.0),
-              //   child:
-              //       // const Text(
-              //       //   'ဇွဲထက်',
-              //       //   textAlign: TextAlign.center,
-              //       //   style: TextStyle(
-              //       //     color: Colors.black,
-              //       //     fontSize: 12.0,
-              //       //     fontFamily: 'helvetica_neue_medium',
-              //       //     letterSpacing: 0.59,
-              //       //   ),
-              //       // ),
-              //       Stack(
-              //     alignment: Alignment.center,
-              //     children: [
-              //       Container(
-              //         decoration: const BoxDecoration(
-              //           image: DecorationImage(
-              //             image: NetworkImage(
-              //                 'https://i.huffpost.com/gen/2867428/images/o-GOOGLE-WIRELESS-SERVICE-facebook.jpg'),
-              //             fit: BoxFit.fill,
-              //           ),
-              //         ),
-              //       ),
-              //       const Positioned(
-              //         bottom: -5,
-              //         left: -6,
-              //         right: -6,
-              //         child: Card(
-              //           shape: RoundedRectangleBorder(
-              //             borderRadius: BorderRadius.only(
-              //               topLeft: Radius.circular(8),
-              //               topRight: Radius.circular(8),
-              //             ),
-              //           ),
-              //           child: Text(
-              //             'ဇွဲထက်',
-              //             textAlign: TextAlign.center,
-              //             style: TextStyle(
-              //               color: Colors.black,
-              //               fontSize: 12.0,
-              //               fontFamily: 'helvetica_neue_medium',
-              //               letterSpacing: 0.59,
-              //             ),
-              //           ),
-              //         ),
-              //       ),
-              //       // Positioned(
-              //       //   bottom: 0,
-              //       //   child: Container(
-              //       //     height: (itemHeight) / 3,
-              //       //     width: double.infinity,
-              //       //     decoration: BoxDecoration(
-              //       //       shape: BoxShape.rectangle,
-              //       //       borderRadius: const BorderRadius.all(
-              //       //           Radius.elliptical(10.0, 20.0)),
-              //       //       color: Colors.black.withOpacity(0.1),
-              //       //     ),
-              //       //     child: const Text(
-              //       //       'ဇွဲထက်',
-              //       //       textAlign: TextAlign.center,
-              //       //       style: TextStyle(
-              //       //         color: Colors.black,
-              //       //         fontSize: 12.0,
-              //       //         fontFamily: 'helvetica_neue_medium',
-              //       //         letterSpacing: 0.59,
-              //       //       ),
-              //       //     ),
-              //       //   ),
-              //       // ),
-              //     ],
-              //   ),
-              // ),
-              Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
+        children: [
+          Consumer<GoldShopController>(
+            builder: (_, controller, __) {
+              return SizedBox(
+                // Added this widget
+                width: 300,
+                height: 300,
+                child: ListView.builder(
+                  itemCount: controller.goldShopLst.length,
+                  itemBuilder: (_, index) => Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: gridViewListGridTile(
+                      controller.goldShopLst.elementAt(index),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget gridViewListGridTile(Gold gold) {
+    return SizedBox(
+      // Added this widget
+      width: 300,
+      height: 300,
+      child: GridTile(
+        child: gridTileChild(gold),
+        footer: gridTileFooter(gold),
+      ),
+    );
+  }
+
+  Widget gridTileChild(Gold gold) {
+    return InkWell(
+      onTap: () {},
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xff7c94b6),
+          image: DecorationImage(
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(
+                Colors.black.withOpacity(0.7), BlendMode.dstATop),
+            image: NetworkImage(
+              gold.imageUrl,
             ),
-            child: gridViewListGridTile(),
           ),
+          borderRadius: BorderRadius.circular(15),
         ),
       ),
     );
   }
 
-  GridTile gridViewListGridTile() {
-    return GridTile(
-      child: gridTileChild(),
-      footer: gridTileFooter(),
-    );
-  }
-
-  Container gridTileChild() {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xff7c94b6),
-        image: DecorationImage(
-          fit: BoxFit.cover,
-          colorFilter: ColorFilter.mode(
-              Colors.black.withOpacity(0.7), BlendMode.dstATop),
-          image: const NetworkImage(
-            'https://i.huffpost.com/gen/2867428/images/o-GOOGLE-WIRELESS-SERVICE-facebook.jpg',
-          ),
-        ),
-        borderRadius: BorderRadius.circular(15),
-      ),
-    );
-  }
-
-  Column gridTileFooter() {
+  Column gridTileFooter(Gold gold) {
     return Column(
       children: [
         Center(
           child: Text(
-            'ဇွဲထက်',
+            gold.name,
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
@@ -251,8 +166,8 @@ class _MainPageState extends State<MainPage> {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              gridTileBar('16 ပဲရည်', 2500000),
-              gridTileBar('15 ပဲရည်', 2200000),
+              gridTileBar('16 ပဲရည်', gold.sixteenPrice),
+              gridTileBar('15 ပဲရည်', gold.fifteenPrice),
             ],
           ),
         ),
@@ -260,7 +175,7 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  GridTileBar gridTileBar(String goldType, int price) {
+  GridTileBar gridTileBar(String goldType, String? price) {
     return GridTileBar(
       leading: Text(
         goldType,
@@ -269,7 +184,7 @@ class _MainPageState extends State<MainPage> {
       ),
       title: const Text(''),
       trailing: Text(
-        price.toStringAsFixed(0),
+        price ?? '',
         textAlign: TextAlign.center,
         style: const TextStyle(color: Colors.white),
       ),
