@@ -50,6 +50,7 @@ class GoldShopController with ChangeNotifier {
             facebook: element.data()['facebook'] ?? '',
             createdDate: createdDate,
             modifiedDate: modifiedDate,
+            color: element.data()['color_hex'] ?? '',
           ),
         );
       }

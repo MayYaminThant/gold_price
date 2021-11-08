@@ -1,7 +1,10 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:gold_price/common/common_widget.dart';
 import 'package:gold_price/controller/gold_shop_controller.dart';
 import 'package:gold_price/model/gold.dart';
+import 'package:gold_price/ui/page/gold_detail.dart';
 import 'package:gold_price/util/common_util.dart';
 import 'package:gold_price/util/screen_util.dart';
 import 'package:provider/provider.dart';
@@ -72,21 +75,18 @@ class _MainPageState extends State<MainPage> {
   }
 
   Widget gridViewWidgetList() {
-    final double itemHeight =
-        (ScreenSizeUtil.getScreenHeight(context) - kToolbarHeight - 100) / 2;
-    final double itemWidth = ScreenSizeUtil.getScreenWidth(context) / 2;
     return Expanded(
       child: GridView.count(
         crossAxisCount: 2,
         crossAxisSpacing: 10.0,
         mainAxisSpacing: 10.0,
-        childAspectRatio: (itemWidth / itemHeight),
+        childAspectRatio: 0.5,
         shrinkWrap: true,
+        scrollDirection: Axis.vertical,
         children: [
           Consumer<GoldShopController>(
             builder: (_, controller, __) {
               return SizedBox(
-                // Added this widget
                 width: 300,
                 height: 300,
                 child: ListView.builder(
@@ -95,7 +95,7 @@ class _MainPageState extends State<MainPage> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: gridViewListGridTile(
+                    child: gridChild(
                       controller.goldShopLst.elementAt(index),
                     ),
                   ),
@@ -108,39 +108,46 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  Widget gridViewListGridTile(Gold gold) {
-    return SizedBox(
-      // Added this widget
-      width: 300,
-      height: 300,
-      child: GridTile(
-        child: gridTileChild(gold),
-        footer: gridTileFooter(gold),
-      ),
-    );
-  }
-
-  Widget gridTileChild(Gold gold) {
+  Widget gridChild(Gold gold) {
     return InkWell(
-      onTap: () {},
-      child: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xff7c94b6),
-          image: DecorationImage(
-            fit: BoxFit.cover,
-            colorFilter: ColorFilter.mode(
-                Colors.black.withOpacity(0.7), BlendMode.dstATop),
-            image: NetworkImage(
-              gold.imageUrl,
-            ),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) {
+              return GoldDetail(gold: gold);
+            },
           ),
-          borderRadius: BorderRadius.circular(15),
+        );
+      },
+      child: SizedBox(
+        width: 300,
+        height: 300,
+        child: GridTile(
+          child: gridImage(gold),
+          footer: gridFooter(gold),
         ),
       ),
     );
   }
 
-  Column gridTileFooter(Gold gold) {
+  Widget gridImage(Gold gold) {
+    return Container(
+      padding: const EdgeInsets.only(top: 20),
+      alignment: Alignment.topCenter,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: Colors.lime,
+      ),
+      child: const Icon(
+        Icons.arrow_circle_up_rounded,
+        color: Colors.red,
+        size: 40,
+      ),
+    );
+  }
+
+  Widget gridFooter(Gold gold) {
     return Column(
       children: [
         Center(
@@ -159,15 +166,15 @@ class _MainPageState extends State<MainPage> {
         const SizedBox(height: 10),
         Container(
           decoration: BoxDecoration(
-            color: Colors.black45.withOpacity(0.35),
-            borderRadius: BorderRadius.circular(15),
+            color: Colors.white.withOpacity(0.4),
+            borderRadius: BorderRadius.circular(20),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              gridTileBar('16 ပဲရည်', gold.sixteenPrice),
-              gridTileBar('15 ပဲရည်', gold.fifteenPrice),
+              gridTileBar('16', gold.sixteenPrice), // ပဲရည်
+              gridTileBar('15', gold.fifteenPrice),
             ],
           ),
         ),
@@ -177,16 +184,26 @@ class _MainPageState extends State<MainPage> {
 
   GridTileBar gridTileBar(String goldType, String? price) {
     return GridTileBar(
-      leading: Text(
-        goldType,
-        textAlign: TextAlign.center,
-        style: const TextStyle(color: Colors.white),
+      leading: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          color: Colors.lime,
+        ),
+        child: Text(
+          goldType,
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: Colors.white),
+        ),
       ),
-      title: const Text(''),
-      trailing: Text(
+      title: Text(
         price ?? '',
         textAlign: TextAlign.center,
-        style: const TextStyle(color: Colors.white),
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+        ),
       ),
     );
   }

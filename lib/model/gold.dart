@@ -12,6 +12,7 @@ class Gold {
   final String facebook;
   final String createdDate;
   final String modifiedDate;
+  final String color;
 
   Gold({
     required this.id,
@@ -25,5 +26,6 @@ class Gold {
     required this.facebook,
     required this.createdDate,
     required this.modifiedDate,
+    required this.color,
   });
 }
