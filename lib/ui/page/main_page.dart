@@ -1,6 +1,8 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:getwidget/getwidget.dart';
+import 'package:gold_price/common/color_extension.dart';
 import 'package:gold_price/common/common_widget.dart';
 import 'package:gold_price/controller/gold_shop_controller.dart';
 import 'package:gold_price/model/gold.dart';
@@ -18,39 +20,74 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
+  final _textController = TextEditingController();
+
+  @override
+  void dispose() {
+    // Clean up the controller when the widget is disposed.
+    _textController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     CommonUtil.doInFuture(() {
       context.read<GoldShopController>().getGoldShopData();
     });
-    return Scaffold(
-      key: widget.scaffoldKey,
-      appBar: appBar(widget.scaffoldKey),
-      body: mainPageBody(context),
-      endDrawer: _drawerLayout(),
-    );
-  }
-
-  SafeArea mainPageBody(BuildContext context) {
     return SafeArea(
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        color: Colors.white,
-        child: Column(
-          children: [
-            searchAndFilterWidget(context),
-            const SizedBox(height: 10),
-            gridViewWidgetList(),
-          ],
-        ),
+      child: Scaffold(
+        key: widget.scaffoldKey,
+        backgroundColor: Colors.white,
+        body: GestureDetector(
+            onTap: () {}, child: mainPageBody(widget.scaffoldKey, context)),
+        endDrawer: _drawerLayout(),
       ),
     );
   }
 
-  AppBar appBar(GlobalKey<ScaffoldState> scaffoldKey) {
-    return AppBar(
-      backgroundColor: Colors.white,
-      elevation: 0, // removing the drop shadow
+  Widget mainPageBody(scaffoldKey, BuildContext context) {
+    return CustomScrollView(
+      slivers: [
+        sliverAppBar(scaffoldKey),
+        SliverToBoxAdapter(
+          child: searchAndFilterWidget(context, scaffoldKey),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.all(8),
+          sliver: Consumer<GoldShopController>(
+              builder: (_, controller, __) => SliverGrid(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 15,
+                      mainAxisSpacing: 15,
+                      childAspectRatio: 0.7,
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                        (BuildContext context, int index) {
+                      return Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: gridChild(
+                          controller.filterGoldShopLst.elementAt(index),
+                        ),
+                      );
+                    }, childCount: controller.filterGoldShopLst.length),
+                  )),
+        )
+      ],
+    );
+  }
+
+  SliverAppBar sliverAppBar(scaffoldKey) {
+    return SliverAppBar(
+      elevation: 0,
+      pinned: true,
+      // stretch: true,
+      // onStretchTrigger: () async {
+      //   setState(() {});
+      // },
       actions: [
         IconButton(
           onPressed: () {
@@ -64,51 +101,22 @@ class _MainPageState extends State<MainPage> {
           ),
         ),
       ],
-      title: const Center(
-        child: Text('နောက်ဆုံးရ ရွှေစျေးနှုန်းများ'),
-      ),
-      titleTextStyle: const TextStyle(
-        color: Colors.black,
-        fontSize: 20,
-      ),
-    );
-  }
-
-  Widget gridViewWidgetList() {
-    return Expanded(
-      child: GridView.count(
-        crossAxisCount: 2,
-        crossAxisSpacing: 10.0,
-        mainAxisSpacing: 10.0,
-        childAspectRatio: 0.5,
-        shrinkWrap: true,
-        scrollDirection: Axis.vertical,
-        children: [
-          Consumer<GoldShopController>(
-            builder: (_, controller, __) {
-              return SizedBox(
-                width: 300,
-                height: 300,
-                child: ListView.builder(
-                  itemCount: controller.goldShopLst.length,
-                  itemBuilder: (_, index) => Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: gridChild(
-                      controller.goldShopLst.elementAt(index),
-                    ),
-                  ),
-                ),
-              );
-            },
+      backgroundColor: Colors.white,
+      flexibleSpace: const FlexibleSpaceBar(
+        centerTitle: true,
+        title: Text(
+          'နောက်ဆုံးရ ရွှေစျေးနှုန်းများ',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 20,
           ),
-        ],
+        ),
       ),
     );
   }
 
   Widget gridChild(Gold gold) {
+    Color colorPr = ColorExtension.fromHex(gold.color);
     return InkWell(
       onTap: () {
         Navigator.push(
@@ -121,23 +129,21 @@ class _MainPageState extends State<MainPage> {
         );
       },
       child: SizedBox(
-        width: 300,
-        height: 300,
         child: GridTile(
-          child: gridImage(gold),
-          footer: gridFooter(gold),
+          child: gridImage(gold, colorPr),
+          footer: gridFooter(gold, colorPr),
         ),
       ),
     );
   }
 
-  Widget gridImage(Gold gold) {
+  Widget gridImage(Gold gold, Color colorPr) {
     return Container(
       padding: const EdgeInsets.only(top: 20),
       alignment: Alignment.topCenter,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        color: Colors.lime,
+        color: colorPr,
       ),
       child: const Icon(
         Icons.arrow_circle_up_rounded,
@@ -147,8 +153,10 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  Widget gridFooter(Gold gold) {
+  Widget gridFooter(Gold gold, Color colorPr) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Center(
           child: Text(
@@ -173,8 +181,8 @@ class _MainPageState extends State<MainPage> {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              gridTileBar('16', gold.sixteenPrice), // ပဲရည်
-              gridTileBar('15', gold.fifteenPrice),
+              gridTileBar('16', gold.sixteenPrice, colorPr), // ပဲရည်
+              gridTileBar('15', gold.fifteenPrice, colorPr),
             ],
           ),
         ),
@@ -182,13 +190,13 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  GridTileBar gridTileBar(String goldType, String? price) {
+  GridTileBar gridTileBar(String goldType, String? price, Color colorPr) {
     return GridTileBar(
       leading: Container(
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(15),
-          color: Colors.lime,
+          color: colorPr,
         ),
         child: Text(
           goldType,
@@ -208,8 +216,9 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  SizedBox searchAndFilterWidget(BuildContext context) {
-    return SizedBox(
+  Widget searchAndFilterWidget(BuildContext context, scaffoldKey) {
+    return Container(
+      padding: const EdgeInsets.all(8),
       width: double.infinity,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -217,7 +226,7 @@ class _MainPageState extends State<MainPage> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           searchWidget(context),
-          filterWidget(),
+          filterWidget(scaffoldKey),
         ],
       ),
     );
@@ -231,38 +240,52 @@ class _MainPageState extends State<MainPage> {
         borderRadius: BorderRadius.circular(8),
         color: grey300,
       ),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: () {},
-            icon: Icon(
-              Icons.search,
-              color: Colors.grey.shade700,
+      child: Consumer<GoldShopController>(
+        builder: (_, goldController, __) => Row(
+          children: [
+            IconButton(
+              icon: Icon(
+                goldController.searchTerm.isEmpty
+                    ? Icons.search
+                    : Icons.close_rounded,
+                color: Colors.grey.shade700,
+              ),
+              onPressed: () {
+                if (goldController.searchTerm.isNotEmpty) {
+                  goldController.searchTerm = '';
+                  _textController.clear();
+                }
+              },
             ),
-          ),
-          Expanded(
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Search',
-                hintStyle: TextStyle(
-                  color: Colors.grey.shade700,
+            Expanded(
+              child: TextField(
+                onSubmitted: (searchStr) {
+                  goldController.searchTerm = searchStr;
+                },
+                cursorColor: Colors.black38,
+                controller: _textController,
+                decoration: InputDecoration(
+                  hintText: 'Search',
+                  hintStyle: TextStyle(
+                    color: Colors.grey.shade700,
+                  ),
+                  border: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  errorBorder: InputBorder.none,
+                  disabledBorder: InputBorder.none,
+                  contentPadding: const EdgeInsets.only(
+                      left: 15, bottom: 11, top: 11, right: 15),
                 ),
-                border: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                errorBorder: InputBorder.none,
-                disabledBorder: InputBorder.none,
-                contentPadding: const EdgeInsets.only(
-                    left: 15, bottom: 11, top: 11, right: 15),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Container filterWidget() {
+  Container filterWidget(scaffoldKey) {
     return Container(
       height: 55,
       width: 50,
@@ -271,7 +294,11 @@ class _MainPageState extends State<MainPage> {
         color: grey300,
       ),
       child: IconButton(
-        onPressed: () {},
+        onPressed: () {
+          if (scaffoldKey.currentState != null) {
+            scaffoldKey.currentState!.openEndDrawer();
+          }
+        },
         icon: Icon(
           Icons.filter_list,
           color: Colors.grey.shade700,
@@ -327,7 +354,74 @@ ClipPath _drawerLayout() => ClipPath(
       clipper: RightDrawerClipper(),
       child: Drawer(
         child: Container(
-          color: Colors.grey,
+          alignment: Alignment.topRight,
+          padding: const EdgeInsets.all(7),
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
+              ascendingToggle(),
+              const SizedBox(height: 20),
+              checkBoxCustom('Sort by Name', true),
+              const SizedBox(height: 20),
+              checkBoxCustom('Sort by 16 ပဲရည်‌စျေး', false),
+            ],
+          ),
         ),
       ),
     );
+
+Row ascendingToggle() {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.end,
+    children: [
+      const Text(
+        'Ascending',
+        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
+      ),
+      const SizedBox(
+        width: 10,
+      ),
+      Consumer<GoldShopController>(
+        builder: (_, controller, __) => GFToggle(
+          boxShape: BoxShape.rectangle,
+          disabledTrackColor: Colors.grey.shade400,
+          enabledTrackColor: Colors.grey.shade400,
+          disabledThumbColor: Colors.green.shade400,
+          enabledThumbColor: Colors.grey.shade700,
+          onChanged: (isCheck) {
+            controller.isAscending = isCheck ?? true;
+          },
+          borderRadius: BorderRadius.circular(5),
+          value: controller.isAscending,
+          type: GFToggleType.custom,
+        ),
+      ),
+    ],
+  );
+}
+
+Widget checkBoxCustom(String title, bool isName) {
+  return Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+    Text(
+      title,
+      style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
+    ),
+    const SizedBox(
+      width: 30,
+    ),
+    Padding(
+      padding: const EdgeInsets.only(right: 8.0),
+      child: Consumer<GoldShopController>(
+        builder: (_, controller, __) => GFCheckbox(
+          size: 21,
+          activeBgColor: GFColors.SUCCESS,
+          onChanged: (value) {
+            controller.isSortByName = isName;
+          },
+          value: controller.isSortByName == isName,
+          inactiveIcon: null,
+        ),
+      ),
+    ),
+  ]);
+}

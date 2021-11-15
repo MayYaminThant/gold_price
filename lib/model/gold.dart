@@ -28,4 +28,25 @@ class Gold {
     required this.modifiedDate,
     required this.color,
   });
+
+  isEqual(Gold object) {
+    if (object.id == id &&
+        object.name == name &&
+        object.imageUrl == imageUrl &&
+        object.goldShopPassword == goldShopPassword &&
+        object.sixteenPrice == sixteenPrice &&
+        object.fifteenPrice == fifteenPrice &&
+        object.createdDate == createdDate &&
+        object.modifiedDate == modifiedDate &&
+        object.phoneNo == phoneNo &&
+        object.website == website &&
+        object.facebook == facebook &&
+        object.createdDate == createdDate &&
+        object.modifiedDate == modifiedDate &&
+        object.color == color) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }
