@@ -2,11 +2,15 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:gold_price/common/common_widget.dart';
+import 'package:gold_price/controller/bottom_nav_controller.dart';
+import 'package:gold_price/controller/gold_shop_controller.dart';
 import 'package:gold_price/model/gold.dart';
 import 'package:gold_price/model/gold_price_rate.dart';
+import 'package:gold_price/ui/page/main_page.dart';
 import 'package:gold_price/util/screen_util.dart';
 import 'package:intl/intl.dart';
 import 'package:linkable/linkable.dart';
+import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -19,21 +23,46 @@ class GoldDetail extends StatefulWidget {
 }
 
 class _GoldDetailState extends State<GoldDetail> {
+  final TextEditingController titleController = TextEditingController();
+  final GlobalKey<FormState> _keyDialogForm = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
-    return Scaffold(
-      backgroundColor: Colors.grey.shade300,
-      body: SafeArea(
-        child: CustomScrollView(
-          scrollBehavior: const ScrollBehavior(),
-          slivers: <Widget>[
-            sliverAppBar(),
-            sliverAppBarForPrice('16 ပဲရည်', ': ' + widget.gold.sixteenPrice),
-            sliverAppBarForPrice('15 ပဲရည်', ': ' + widget.gold.fifteenPrice),
-            sliverListCard(textTheme, infoView()),
-            sliverListCard(textTheme, chartWidget()),
-          ],
+    return WillPopScope(
+      onWillPop: () => Future.value(false),
+      child: Scaffold(
+        backgroundColor: Colors.grey.shade300,
+        body: SafeArea(
+          child: CustomScrollView(
+            scrollBehavior: const ScrollBehavior(),
+            slivers: <Widget>[
+              sliverAppBar(),
+              sliverAppBarForPrice('16 ပဲရည်', ': ' + widget.gold.sixteenPrice),
+              sliverAppBarForPrice('15 ပဲရည်', ': ' + widget.gold.fifteenPrice),
+              sliverListCard(textTheme, infoView()),
+              sliverListCard(textTheme, chartWidget()),
+            ],
+          ),
+        ),
+        floatingActionButton: Consumer<BottomNavController>(
+          builder: (_, botC, __) => Consumer<GoldShopController>(
+            builder: (_, goldC, __) => FloatingActionButton(
+              onPressed: () {
+                showTitleDialog();
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(
+                //     builder: (context) {
+                //       botC.selectedIndex = 1;
+                //       goldC.currentEditGold = widget.gold;
+                //       return const MainPage();
+                //     },
+                //   ),
+                // );
+              },
+              child: const Icon(Icons.edit),
+            ),
+          ),
         ),
       ),
     );
@@ -46,14 +75,20 @@ class _GoldDetailState extends State<GoldDetail> {
       onStretchTrigger: () async {
         setState(() {});
       },
-      leading: IconButton(
-        onPressed: () {
-          Navigator.pop(context, "Backbutton data");
-        },
-        icon: const Icon(
-          Icons.arrow_back_ios,
-          size: 30,
-          color: Colors.white,
+      leading: Consumer<BottomNavController>(
+        builder: (_, bController, __) => Consumer<GoldShopController>(
+          builder: (_, controller, __) => IconButton(
+            onPressed: () {
+              bController.selectedIndex = 0;
+              controller.currentEditGold = controller.newGold;
+              Navigator.pop(context, "Backbutton data");
+            },
+            icon: const Icon(
+              Icons.arrow_back_ios,
+              size: 30,
+              color: Colors.white,
+            ),
+          ),
         ),
       ),
       backgroundColor: Colors.black,
@@ -325,6 +360,58 @@ class _GoldDetailState extends State<GoldDetail> {
       GoldPriceRate(25, 3000000),
     ];
     return chartData;
+  }
+
+  Future showTitleDialog() {
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Form(
+              key: _keyDialogForm,
+              child: Column(
+                children: <Widget>[
+                  TextFormField(
+                    decoration: const InputDecoration(),
+                    maxLength: 8,
+                    textAlign: TextAlign.center,
+                    onSaved: (val) {
+                      if (val != null && val.isNotEmpty) {
+                        titleController.text = val;
+                      }
+                    },
+                    autovalidateMode: AutovalidateMode.always,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Enter Title Name';
+                      }
+
+                      return null;
+                    },
+                  )
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              ElevatedButton(
+                onPressed: () {
+                  if (_keyDialogForm.currentState != null &&
+                      _keyDialogForm.currentState!.validate()) {
+                    _keyDialogForm.currentState!.save();
+
+                    Navigator.pop(context);
+                  }
+                },
+                child: const Text('Save'),
+              ),
+              ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Cancel')),
+            ],
+          );
+        });
   }
 }
 

@@ -26,20 +26,63 @@ class GoldShopController with ChangeNotifier {
   bool _isAscending = true;
   bool get isAscending => _isAscending;
 
-  Gold get newGold => Gold(
-        id: '0',
-        name: '',
-        imageUrl: '',
-        goldShopPassword: '',
-        sixteenPrice: '0',
-        fifteenPrice: '0',
-        phoneNo: '0',
-        website: '',
-        facebook: '',
-        createdDate: '',
-        modifiedDate: '',
-        color: '',
-      );
+  Gold newGold = Gold(
+    id: '0',
+    name: '',
+    imageUrl: '',
+    goldShopPassword: '',
+    sixteenPrice: '0',
+    fifteenPrice: '0',
+    phoneNo: '0',
+    website: '',
+    facebook: '',
+    createdDate: '',
+    modifiedDate: '',
+    color: '',
+  );
+
+  Gold _currentEditGold = Gold(
+    id: '',
+    name: '',
+    imageUrl: '',
+    goldShopPassword: '',
+    sixteenPrice: '',
+    fifteenPrice: '',
+    phoneNo: '',
+    website: '',
+    facebook: '',
+    createdDate: '',
+    modifiedDate: '',
+    color: '',
+  );
+  Gold get currentEditGold => _currentEditGold;
+
+  set currentEditGold(Gold currentEditGold) {
+    if (_currentEditGold == currentEditGold) return;
+
+    _currentEditGold = currentEditGold;
+
+    notifyListeners();
+  }
+
+  resetCurrentEditGold() {
+    _currentEditGold = Gold(
+      id: '',
+      name: '',
+      imageUrl: '',
+      goldShopPassword: '',
+      sixteenPrice: '',
+      fifteenPrice: '',
+      phoneNo: '',
+      website: '',
+      facebook: '',
+      createdDate: '',
+      modifiedDate: '',
+      color: '',
+    );
+
+    notifyListeners();
+  }
 
   set searchTerm(String searchTerm) {
     if (_searchTerm == searchTerm) return;
@@ -53,12 +96,14 @@ class GoldShopController with ChangeNotifier {
   set isSortByName(bool isSortByName) {
     if (isSortByName == _isSortByName) return;
     _isSortByName = isSortByName;
+    getGoldShopData();
     notifyListeners();
   }
 
   set isAscending(bool isAscending) {
     if (isAscending == _isAscending) return;
     _isAscending = isAscending;
+    getGoldShopData();
     notifyListeners();
   }
 
@@ -74,7 +119,8 @@ class GoldShopController with ChangeNotifier {
     notifyListeners();
     FirebaseFirestore.instance
         .collection('goldShop')
-        .orderBy('created_date')
+        .orderBy(isSortByName ? 'name' : 'sixteen_price',
+            descending: !isAscending)
         .get()
         .then((QuerySnapshot snapshot) async {
       _goldShopLst = [];

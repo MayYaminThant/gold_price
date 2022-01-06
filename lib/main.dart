@@ -1,5 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:gold_price/controller/bottom_nav_controller.dart';
 
+import 'controller/calculate_page_controller.dart';
 import 'controller/gold_shop_controller.dart';
 import 'ui/page/main_page.dart';
 
@@ -20,6 +22,8 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => GoldShopController(0)),
+        ChangeNotifierProvider(create: (_) => BottomNavController(0)),
+        ChangeNotifierProvider(create: (_) => CalulatePageController()),
       ],
       child: const MaterialAppWidget(),
     );
@@ -33,7 +37,7 @@ class MaterialAppWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
       home: MainPage(),
     );
