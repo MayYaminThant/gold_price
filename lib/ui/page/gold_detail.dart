@@ -1,18 +1,20 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gold_price/common/common_widget.dart';
 import 'package:gold_price/controller/bottom_nav_controller.dart';
 import 'package:gold_price/controller/gold_shop_controller.dart';
 import 'package:gold_price/model/gold.dart';
 import 'package:gold_price/model/gold_price_rate.dart';
-import 'package:gold_price/ui/page/main_page.dart';
 import 'package:gold_price/util/screen_util.dart';
 import 'package:intl/intl.dart';
 import 'package:linkable/linkable.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import 'main_page.dart';
 
 class GoldDetail extends StatefulWidget {
   const GoldDetail({Key? key, required this.gold}) : super(key: key);
@@ -24,6 +26,7 @@ class GoldDetail extends StatefulWidget {
 
 class _GoldDetailState extends State<GoldDetail> {
   final TextEditingController titleController = TextEditingController();
+  final TextEditingController pswController = TextEditingController();
   final GlobalKey<FormState> _keyDialogForm = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
@@ -44,25 +47,11 @@ class _GoldDetailState extends State<GoldDetail> {
             ],
           ),
         ),
-        floatingActionButton: Consumer<BottomNavController>(
-          builder: (_, botC, __) => Consumer<GoldShopController>(
-            builder: (_, goldC, __) => FloatingActionButton(
-              onPressed: () {
-                showTitleDialog();
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(
-                //     builder: (context) {
-                //       botC.selectedIndex = 1;
-                //       goldC.currentEditGold = widget.gold;
-                //       return const MainPage();
-                //     },
-                //   ),
-                // );
-              },
-              child: const Icon(Icons.edit),
-            ),
-          ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            showTitleDialog();
+          },
+          child: const Icon(Icons.edit),
         ),
       ),
     );
@@ -371,8 +360,21 @@ class _GoldDetailState extends State<GoldDetail> {
               key: _keyDialogForm,
               child: Column(
                 children: <Widget>[
+                  const Text(
+                    'Input your gold shop password',
+                    style: TextStyle(fontSize: 17.5),
+                  ),
                   TextFormField(
-                    decoration: const InputDecoration(),
+                    controller: pswController,
+                    decoration: const InputDecoration(
+                      focusedErrorBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue),
+                      ),
+                      errorBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue),
+                      ),
+                      // errorStyle: TextStyle(color: Colors.blue),
+                    ),
                     maxLength: 8,
                     textAlign: TextAlign.center,
                     onSaved: (val) {
@@ -380,10 +382,9 @@ class _GoldDetailState extends State<GoldDetail> {
                         titleController.text = val;
                       }
                     },
-                    autovalidateMode: AutovalidateMode.always,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Enter Title Name';
+                        return 'Enter Your Password';
                       }
 
                       return null;
@@ -399,7 +400,37 @@ class _GoldDetailState extends State<GoldDetail> {
                       _keyDialogForm.currentState!.validate()) {
                     _keyDialogForm.currentState!.save();
 
-                    Navigator.pop(context);
+                    FirebaseFirestore.instance
+                        .collection('goldShop')
+                        .where("id", isEqualTo: widget.gold.id)
+                        .where("gold_shop_password",
+                            isEqualTo: pswController.text)
+                        .get()
+                        .then((QuerySnapshot snapshot) async {
+                      if (snapshot.docs.isNotEmpty) {
+                        pswController.text = "";
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) {
+                              context
+                                  .read<BottomNavController>()
+                                  .selectedIndex = 1;
+                              context
+                                  .read<GoldShopController>()
+                                  .currentEditGold = widget.gold;
+                              return const MainPage();
+                            },
+                          ),
+                        );
+                      } else {
+                        // Scaffold.of(context).showSnackBar(const SnackBar(
+                        //   content: Text('Password is wrong!'),
+                        // ));
+                        Navigator.pop(context);
+                      }
+                    });
                   }
                 },
                 child: const Text('Save'),
@@ -413,6 +444,141 @@ class _GoldDetailState extends State<GoldDetail> {
           );
         });
   }
+
+//   void showBottomDialog() {
+//     showGeneralDialog(
+//       barrierLabel: "showGeneralDialog",
+//       barrierDismissible: true,
+//       barrierColor: Colors.black.withOpacity(0.6),
+//       transitionDuration: const Duration(milliseconds: 400),
+//       context: context,
+//       pageBuilder: (context, _, __) {
+//         return Align(
+//           alignment: Alignment.bottomCenter,
+//           child: _buildDialogContent(),
+//         );
+//       },
+//       transitionBuilder: (_, animation1, __, child) {
+//         return SlideTransition(
+//           position: Tween(
+//             begin: const Offset(0, 1),
+//             end: const Offset(0, 0),
+//           ).animate(animation1),
+//           child: child,
+//         );
+//       },
+//     );
+//   }
+
+//   Widget _buildDialogContent() {
+//     return IntrinsicHeight(
+//       child: Container(
+//         width: double.maxFinite,
+//         clipBehavior: Clip.antiAlias,
+//         padding: const EdgeInsets.all(16),
+//         decoration: const BoxDecoration(
+//           color: Colors.white,
+//           borderRadius: BorderRadius.only(
+//             topLeft: Radius.circular(16),
+//             topRight: Radius.circular(16),
+//           ),
+//         ),
+//         child: Material(
+//           child: Column(
+//             children: [
+//               const SizedBox(height: 16),
+//               _buildImage(),
+//               const SizedBox(height: 8),
+//               _buildContinueText(),
+//               const SizedBox(height: 16),
+//               _buildTextField(),
+//               const SizedBox(height: 16),
+//               _buildContinueButton(),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+
+//   Widget _buildImage() {
+//     return SizedBox(
+//       height: 88,
+//       child: Image.asset('assets/images/psw.png', fit: BoxFit.cover),
+//     );
+//   }
+
+//   Widget _buildContinueText() {
+//     return const Text(
+//       'Continue with account',
+//       style: TextStyle(
+//         fontSize: 22,
+//         fontWeight: FontWeight.w500,
+//       ),
+//     );
+//   }
+
+//   Widget _buildTextField() {
+//     const iconSize = 40.0;
+//     return Container(
+//         height: 60,
+//         padding: const EdgeInsets.symmetric(horizontal: 16),
+//         decoration: BoxDecoration(
+//           color: Colors.white,
+//           border: Border.all(width: 1, color: Colors.grey.withOpacity(0.4)),
+//           borderRadius: const BorderRadius.all(Radius.circular(8)),
+//         ),
+//         child: TextFormField(
+//           keyboardType: TextInputType.visiblePassword,
+//           decoration: const InputDecoration(
+//             border: InputBorder.none,
+//             focusedBorder: InputBorder.none,
+//             enabledBorder: InputBorder.none,
+//             errorBorder: InputBorder.none,
+//             disabledBorder: InputBorder.none,
+//           ),
+//           maxLength: 8,
+//           textAlign: TextAlign.center,
+//           onSaved: (val) {
+//             if (val != null && val.isNotEmpty) {
+//               titleController.text = val;
+//             }
+//           },
+//           autovalidateMode: AutovalidateMode.always,
+//           validator: (value) {
+//             if (value == null || value.isEmpty) {
+//               return 'Enter Title Name';
+//             }
+
+//             return null;
+//           },
+//         ));
+//   }
+
+//   Widget _buildContinueButton() {
+//     return Container(
+//       height: 40,
+//       width: double.maxFinite,
+//       decoration: const BoxDecoration(
+//         color: Color(0xFF3375e0),
+//         borderRadius: BorderRadius.all(Radius.circular(8)),
+//       ),
+//       child: RawMaterialButton(
+//         onPressed: () {
+//           Navigator.of(context, rootNavigator: true).pop();
+//         },
+//         child: const Center(
+//           child: Text(
+//             'Continue',
+//             style: TextStyle(
+//               color: Colors.white,
+//               fontWeight: FontWeight.w500,
+//             ),
+//           ),
+//         ),
+//       ),
+//     );
+//   }
 }
 
 enum ServiceAction { none, phone, facebook, website }

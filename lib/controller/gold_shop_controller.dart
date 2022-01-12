@@ -159,6 +159,20 @@ class GoldShopController with ChangeNotifier {
     });
   }
 
+  // Future<void> checkGoldPassword(String id) async {
+  //   _goldShopLst = [];
+  //   _filterGoldShopLst = [];
+  //   notifyListeners();
+  //   FirebaseFirestore.instance
+  //       .collection('goldShop')
+  //       .where("id", isEqualTo: id)
+  //       .where("gold_shop_password", isEqualTo: "123456")
+  //       .get()
+  //       .then((QuerySnapshot snapshot) async {
+
+  //   });
+  // }
+
   getDate(value) {
     var dateParse;
     if (value != null) {
