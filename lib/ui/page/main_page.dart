@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
@@ -24,7 +26,7 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
+  final GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
   @override
   Widget build(BuildContext context) {
     CommonUtil.doInFuture(() {
@@ -81,9 +83,8 @@ class _MainPageState extends State<MainPage> {
         size: 25, color: (isSelected ? Colors.white : Colors.black));
   }
 
-  Future showWarningDialog(BottomNavController controller, int index) {
-    // final CurvedNavigationBarState? navBarState =
-    //     _bottomNavigationKey.currentState;
+  Object showWarningDialog(BottomNavController controller, int index) {
+    CurvedNavigationBarState? navBarState = _bottomNavigationKey.currentState;
     return showDialog(
         context: context,
         builder: (BuildContext bContext) {
@@ -92,30 +93,25 @@ class _MainPageState extends State<MainPage> {
             actions: <Widget>[
               ElevatedButton(
                 onPressed: () {
-                  _bottomNavigationKey.currentState?.setPage(index);
-                  controller.selectedIndex = index;
-                  Navigator.pop(context, true);
+                  Navigator.of(bContext).pop();
+                  Timer(const Duration(seconds: 4), () {
+                    controller.selectedIndex = index;
+                    navBarState?.setPage(index);
+                  });
                 },
                 child: const Text('Go To'),
               ),
               ElevatedButton(
                   onPressed: () {
-                    _bottomNavigationKey.currentState
-                        ?.setPage(controller.selectedIndex);
-                    Navigator.pop(context, false);
+                    Navigator.of(bContext).pop();
+                    Timer(const Duration(seconds: 4), () {
+                      navBarState?.setPage(controller.selectedIndex);
+                    });
                   },
                   child: const Text('Cancel')),
             ],
           );
-        }).then((exit) {
-      if (exit == null) return;
-
-      if (exit) {
-        // user pressed Yes button
-      } else {
-        // user pressed No button
-      }
-    });
+        });
   }
 }
 
