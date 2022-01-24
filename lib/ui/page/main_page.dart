@@ -24,6 +24,7 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
+  GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
   @override
   Widget build(BuildContext context) {
     CommonUtil.doInFuture(() {
@@ -47,7 +48,7 @@ class _MainPageState extends State<MainPage> {
     return Consumer<GoldShopController>(
       builder: (_, goldController, __) => Consumer<BottomNavController>(
         builder: (_, controller, __) => CurvedNavigationBar(
-          // key: _bottomNavigationKey,
+          key: _bottomNavigationKey,
           index: controller.selectedIndex,
           height: 50.0,
           items: <Widget>[
@@ -69,6 +70,7 @@ class _MainPageState extends State<MainPage> {
               controller.selectedIndex = index;
             }
           },
+          letIndexChange: (index) => true,
         ),
       ),
     );
@@ -80,30 +82,40 @@ class _MainPageState extends State<MainPage> {
   }
 
   Future showWarningDialog(BottomNavController controller, int index) {
+    // final CurvedNavigationBarState? navBarState =
+    //     _bottomNavigationKey.currentState;
     return showDialog(
         context: context,
-        builder: (BuildContext context) {
+        builder: (BuildContext bContext) {
           return AlertDialog(
             title: const Text('Current Editing is dismissed data!'),
             actions: <Widget>[
               ElevatedButton(
                 onPressed: () {
-                  Navigator.pop(context);
+                  _bottomNavigationKey.currentState?.setPage(index);
                   controller.selectedIndex = index;
+                  Navigator.pop(context, true);
                 },
                 child: const Text('Go To'),
               ),
               ElevatedButton(
                   onPressed: () {
-                    var preIndex = controller.selectedIndex;
-                    Navigator.pop(context);
-                    controller.selectedIndex = index;
-                    controller.selectedIndex = preIndex;
+                    _bottomNavigationKey.currentState
+                        ?.setPage(controller.selectedIndex);
+                    Navigator.pop(context, false);
                   },
                   child: const Text('Cancel')),
             ],
           );
-        });
+        }).then((exit) {
+      if (exit == null) return;
+
+      if (exit) {
+        // user pressed Yes button
+      } else {
+        // user pressed No button
+      }
+    });
   }
 }
 
