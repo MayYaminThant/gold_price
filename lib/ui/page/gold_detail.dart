@@ -410,16 +410,13 @@ class _GoldDetailState extends State<GoldDetail> {
                       if (snapshot.docs.isNotEmpty) {
                         pswController.text = "";
                         Navigator.pop(context);
+                        context.read<BottomNavController>().selectedIndex = 1;
+                        context.read<GoldShopController>().currentEditGold =
+                            widget.gold;
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) {
-                              context
-                                  .read<BottomNavController>()
-                                  .selectedIndex = 1;
-                              context
-                                  .read<GoldShopController>()
-                                  .currentEditGold = widget.gold;
                               return const MainPage();
                             },
                           ),
@@ -437,6 +434,7 @@ class _GoldDetailState extends State<GoldDetail> {
               ),
               ElevatedButton(
                   onPressed: () {
+                    pswController.text = "";
                     Navigator.pop(context);
                   },
                   child: const Text('Cancel')),

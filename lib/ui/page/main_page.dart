@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:gold_price/controller/bottom_nav_controller.dart';
 import 'package:gold_price/controller/gold_shop_controller.dart';
+import 'package:gold_price/model/gold.dart';
 import 'package:gold_price/ui/page/calulate_page.dart';
 import 'package:gold_price/ui/page/gold_editor_page.dart';
 import 'package:gold_price/ui/page/home_page.dart';
@@ -42,26 +43,33 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  Consumer<BottomNavController> bottomNavBar() {
-    return Consumer<BottomNavController>(
-      builder: (_, controller, __) => CurvedNavigationBar(
-        // key: _bottomNavigationKey,
-        index: controller.selectedIndex,
-        height: 50.0,
-        items: <Widget>[
-          bottomNavIcon(Icons.home, controller.selectedIndex == 0),
-          bottomNavIcon(Icons.add, controller.selectedIndex == 1),
-          bottomNavIcon(Icons.calculate, controller.selectedIndex == 2),
-        ],
-        color: Colors.grey.shade400,
-        buttonBackgroundColor: Colors.blue,
-        backgroundColor: Colors.white,
-        animationCurve: Curves.ease,
-        animationDuration: const Duration(milliseconds: 600),
-        onTap: (index) {
-          controller.selectedIndex = index;
-        },
-        letIndexChange: (index) => true,
+  Consumer<GoldShopController> bottomNavBar() {
+    return Consumer<GoldShopController>(
+      builder: (_, goldController, __) => Consumer<BottomNavController>(
+        builder: (_, controller, __) => CurvedNavigationBar(
+          // key: _bottomNavigationKey,
+          index: controller.selectedIndex,
+          height: 50.0,
+          items: <Widget>[
+            bottomNavIcon(Icons.home, controller.selectedIndex == 0),
+            bottomNavIcon(Icons.add, controller.selectedIndex == 1),
+            bottomNavIcon(Icons.calculate, controller.selectedIndex == 2),
+          ],
+          color: Colors.grey.shade400,
+          buttonBackgroundColor: Colors.blue,
+          backgroundColor: Colors.white,
+          animationCurve: Curves.ease,
+          animationDuration: const Duration(milliseconds: 600),
+          onTap: (index) {
+            Gold currentGold = goldController.currentEditGold;
+            if (controller.selectedIndex == 1 &&
+                (currentGold.id != '' && currentGold.id != '0')) {
+              showWarningDialog(controller, index);
+            } else {
+              controller.selectedIndex = index;
+            }
+          },
+        ),
       ),
     );
   }
@@ -69,6 +77,33 @@ class _MainPageState extends State<MainPage> {
   Widget bottomNavIcon(IconData icon, bool isSelected) {
     return Icon(icon,
         size: 25, color: (isSelected ? Colors.white : Colors.black));
+  }
+
+  Future showWarningDialog(BottomNavController controller, int index) {
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Current Editing is dismissed data!'),
+            actions: <Widget>[
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  controller.selectedIndex = index;
+                },
+                child: const Text('Go To'),
+              ),
+              ElevatedButton(
+                  onPressed: () {
+                    var preIndex = controller.selectedIndex;
+                    Navigator.pop(context);
+                    controller.selectedIndex = index;
+                    controller.selectedIndex = preIndex;
+                  },
+                  child: const Text('Cancel')),
+            ],
+          );
+        });
   }
 }
 
