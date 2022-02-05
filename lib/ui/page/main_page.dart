@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
+import 'package:gold_price/common/common_widget.dart';
 import 'package:gold_price/controller/bottom_nav_controller.dart';
 import 'package:gold_price/controller/gold_shop_controller.dart';
 import 'package:gold_price/model/gold.dart';
@@ -14,7 +15,7 @@ import 'package:provider/provider.dart';
 
 final bodyTags = [
   const HomePage(),
-  GoldEditorPage(),
+  const GoldEditorPage(),
   const CalculatePage(),
 ];
 
@@ -85,33 +86,24 @@ class _MainPageState extends State<MainPage> {
 
   Object showWarningDialog(BottomNavController controller, int index) {
     CurvedNavigationBarState? navBarState = _bottomNavigationKey.currentState;
-    return showDialog(
-        context: context,
-        builder: (BuildContext bContext) {
-          return AlertDialog(
-            title: const Text('Current Editing is dismissed data!'),
-            actions: <Widget>[
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(bContext).pop();
-                  Timer(const Duration(seconds: 4), () {
-                    controller.selectedIndex = index;
-                    navBarState?.setPage(index);
-                  });
-                },
-                child: const Text('Go To'),
-              ),
-              ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(bContext).pop();
-                    Timer(const Duration(seconds: 4), () {
-                      navBarState?.setPage(controller.selectedIndex);
-                    });
-                  },
-                  child: const Text('Cancel')),
-            ],
-          );
+    return warningDialog(
+      context,
+      'Current Editing is dismissed data!',
+      'Go To',
+      () {
+        Navigator.of(context).pop();
+        Timer(const Duration(seconds: 4), () {
+          controller.selectedIndex = index;
+          navBarState?.setPage(index);
         });
+      },
+      () {
+        Navigator.of(context).pop();
+        Timer(const Duration(seconds: 4), () {
+          navBarState?.setPage(controller.selectedIndex);
+        });
+      },
+    );
   }
 }
 

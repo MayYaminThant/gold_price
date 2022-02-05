@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gold_price/common/common_widget.dart';
 import 'package:gold_price/controller/bottom_nav_controller.dart';
@@ -365,6 +364,7 @@ class _GoldDetailState extends State<GoldDetail> {
                     style: TextStyle(fontSize: 17.5),
                   ),
                   TextFormField(
+                    autofocus: true,
                     controller: pswController,
                     decoration: const InputDecoration(
                       focusedErrorBorder: UnderlineInputBorder(
@@ -400,14 +400,10 @@ class _GoldDetailState extends State<GoldDetail> {
                       _keyDialogForm.currentState!.validate()) {
                     _keyDialogForm.currentState!.save();
 
-                    FirebaseFirestore.instance
-                        .collection('goldShop')
-                        .where("id", isEqualTo: widget.gold.id)
-                        .where("gold_shop_password",
-                            isEqualTo: pswController.text)
-                        .get()
-                        .then((QuerySnapshot snapshot) async {
-                      if (snapshot.docs.isNotEmpty) {
+                    GoldShopController.checkGoldPassword(
+                      widget.gold.id,
+                      pswController.text,
+                      () {
                         pswController.text = "";
                         Navigator.pop(context);
                         context.read<BottomNavController>().selectedIndex = 1;
@@ -421,13 +417,11 @@ class _GoldDetailState extends State<GoldDetail> {
                             },
                           ),
                         );
-                      } else {
-                        // Scaffold.of(context).showSnackBar(const SnackBar(
-                        //   content: Text('Password is wrong!'),
-                        // ));
+                      },
+                      () {
                         Navigator.pop(context);
-                      }
-                    });
+                      },
+                    );
                   }
                 },
                 child: const Text('Save'),
