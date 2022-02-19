@@ -66,8 +66,7 @@ class _MainPageState extends State<MainPage> {
           animationDuration: const Duration(milliseconds: 600),
           onTap: (index) {
             Gold currentGold = goldController.currentEditGold;
-            if (controller.selectedIndex == 1 &&
-                (currentGold.id != '' && currentGold.id != '0')) {
+            if (controller.selectedIndex == 1 && currentGold.id != '0') {
               showWarningDialog(controller, index);
             } else {
               controller.selectedIndex = index;
@@ -84,9 +83,10 @@ class _MainPageState extends State<MainPage> {
         size: 25, color: (isSelected ? Colors.white : Colors.black));
   }
 
-  Object showWarningDialog(BottomNavController controller, int index) {
+  void showWarningDialog(BottomNavController controller, int index) {
     CurvedNavigationBarState? navBarState = _bottomNavigationKey.currentState;
-    return warningDialog(
+
+    warningDialog(
       context,
       'Current Editing is dismissed data!',
       'Go To',
