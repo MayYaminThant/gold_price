@@ -159,28 +159,14 @@ class GoldShopController with ChangeNotifier {
     });
   }
 
-  // Future<void> checkGoldPassword(String id) async {
-  //   _goldShopLst = [];
-  //   _filterGoldShopLst = [];
-  //   notifyListeners();
-  //   FirebaseFirestore.instance
-  //       .collection('goldShop')
-  //       .where("id", isEqualTo: id)
-  //       .where("gold_shop_password", isEqualTo: "123456")
-  //       .get()
-  //       .then((QuerySnapshot snapshot) async {
-
-  //   });
-  // }
-
   getDate(value) {
-    var dateParse;
+    DateTime? dateParse;
     if (value != null) {
       var date = value.toDate().toString();
       dateParse = DateFormat('yyyy-MM-dd').parse(date);
     }
     var dateFormat =
-        value != null ? DateFormat('yyyy-MM-dd').format(dateParse) : '';
+        value != null ? DateFormat('yyyy-MM-dd').format(dateParse!) : '';
     return dateFormat;
   }
 
@@ -198,5 +184,62 @@ class GoldShopController with ChangeNotifier {
       }
       notifyListeners();
     }
+  }
+
+  static void checkGoldPassword(
+    String id,
+    String password,
+    VoidCallback successCallback,
+    VoidCallback failureCallback,
+  ) {
+    FirebaseFirestore.instance
+        .collection('goldShop')
+        .where("id", isEqualTo: id)
+        .where("gold_shop_password", isEqualTo: password)
+        .get()
+        .then((QuerySnapshot snapshot) async {
+      if (snapshot.docs.isNotEmpty) {
+        successCallback.call();
+      } else {
+        failureCallback.call();
+      }
+    });
+  }
+
+  updateGoldData(
+    BuildContext context,
+    String id,
+    Map<String, dynamic> data,
+  ) {
+    FocusManager.instance.primaryFocus?.unfocus();
+    FirebaseFirestore.instance
+        .collection('goldShop')
+        .doc(id)
+        .update(data)
+        .then((value) {
+      final snackBar =
+          showSnackBar('Updated Successful', Colors.green.shade200, () {});
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      getGoldShopData();
+      notifyListeners();
+    }).catchError(
+      (error) {
+        final snackBar =
+            showSnackBar('Update failed: $error', Colors.green.shade200, () {});
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      },
+    );
+  }
+
+  static showSnackBar(
+      String text, Color bgColor, VoidCallback dismissCallback) {
+    return SnackBar(
+      content: Text(text),
+      backgroundColor: (bgColor),
+      action: SnackBarAction(
+        label: 'dismiss',
+        onPressed: dismissCallback,
+      ),
+    );
   }
 }

@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
+import 'package:gold_price/common/common_widget.dart';
 import 'package:gold_price/controller/bottom_nav_controller.dart';
 import 'package:gold_price/controller/gold_shop_controller.dart';
 import 'package:gold_price/model/gold.dart';
@@ -12,7 +15,7 @@ import 'package:provider/provider.dart';
 
 final bodyTags = [
   const HomePage(),
-  GoldEditorPage(),
+  const GoldEditorPage(),
   const CalculatePage(),
 ];
 
@@ -24,6 +27,7 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
+  final GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
   @override
   Widget build(BuildContext context) {
     CommonUtil.doInFuture(() {
@@ -47,7 +51,7 @@ class _MainPageState extends State<MainPage> {
     return Consumer<GoldShopController>(
       builder: (_, goldController, __) => Consumer<BottomNavController>(
         builder: (_, controller, __) => CurvedNavigationBar(
-          // key: _bottomNavigationKey,
+          key: _bottomNavigationKey,
           index: controller.selectedIndex,
           height: 50.0,
           items: <Widget>[
@@ -69,6 +73,7 @@ class _MainPageState extends State<MainPage> {
               controller.selectedIndex = index;
             }
           },
+          letIndexChange: (index) => true,
         ),
       ),
     );
@@ -79,31 +84,26 @@ class _MainPageState extends State<MainPage> {
         size: 25, color: (isSelected ? Colors.white : Colors.black));
   }
 
-  Future showWarningDialog(BottomNavController controller, int index) {
-    return showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Current Editing is dismissed data!'),
-            actions: <Widget>[
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  controller.selectedIndex = index;
-                },
-                child: const Text('Go To'),
-              ),
-              ElevatedButton(
-                  onPressed: () {
-                    var preIndex = controller.selectedIndex;
-                    Navigator.pop(context);
-                    controller.selectedIndex = index;
-                    controller.selectedIndex = preIndex;
-                  },
-                  child: const Text('Cancel')),
-            ],
-          );
+  Object showWarningDialog(BottomNavController controller, int index) {
+    CurvedNavigationBarState? navBarState = _bottomNavigationKey.currentState;
+    return warningDialog(
+      context,
+      'Current Editing is dismissed data!',
+      'Go To',
+      () {
+        Navigator.of(context).pop();
+        Timer(const Duration(seconds: 4), () {
+          controller.selectedIndex = index;
+          navBarState?.setPage(index);
         });
+      },
+      () {
+        Navigator.of(context).pop();
+        Timer(const Duration(seconds: 4), () {
+          navBarState?.setPage(controller.selectedIndex);
+        });
+      },
+    );
   }
 }
 

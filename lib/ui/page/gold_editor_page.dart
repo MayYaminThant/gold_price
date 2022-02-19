@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:gold_price/common/common_widget.dart';
 import 'package:gold_price/controller/bottom_nav_controller.dart';
 import 'package:gold_price/controller/gold_shop_controller.dart';
 import 'package:gold_price/model/gold.dart';
@@ -8,8 +10,7 @@ import 'package:gold_price/util/screen_util.dart';
 import 'package:provider/provider.dart';
 
 class GoldEditorPage extends StatefulWidget {
-  GoldEditorPage({Key? key}) : super(key: key);
-  final _formKey = GlobalKey<FormState>();
+  const GoldEditorPage({Key? key}) : super(key: key);
 
   @override
   _GoldEditorPageState createState() => _GoldEditorPageState();
@@ -28,10 +29,11 @@ class _GoldEditorPageState extends State<GoldEditorPage> {
       TextEditingController();
   final TextEditingController _modifiedDateTextController =
       TextEditingController();
+  late Gold gold;
   @override
   Widget build(BuildContext context) {
     CommonUtil.doInFuture(() {
-      Gold gold = context.read<GoldShopController>().currentEditGold;
+      gold = context.read<GoldShopController>().currentEditGold;
       _shopNameTextController.text = gold.name;
       _sixteenPrcTextController.text = gold.sixteenPrice;
       _fifteenPrcTextController.text = gold.fifteenPrice;
@@ -117,19 +119,6 @@ class _GoldEditorPageState extends State<GoldEditorPage> {
               ),
             ),
           ),
-          // Positioned(
-          //   bottom: 0,
-          //   right: 10,
-          //   child: IconButton(
-          //     icon: const Icon(
-          //       Icons.add_a_photo,
-          //       size: 35,
-          //     ),
-          //     onPressed: () {},
-          //   ),
-          // )
-          // ],
-          // ),
         ),
       ),
       actions: [
@@ -151,15 +140,17 @@ class _GoldEditorPageState extends State<GoldEditorPage> {
                     size: 33,
                   ),
                   onTap: () {
-                    // todo
+                    showWarningDialog();
                   }),
               SpeedDialChild(
-                child: const Icon(
-                  Icons.close,
-                  color: Colors.black,
-                  size: 33,
-                ),
-              ),
+                  child: const Icon(
+                    Icons.close,
+                    color: Colors.black,
+                    size: 33,
+                  ),
+                  onTap: () {
+                    setState(() {});
+                  }),
               SpeedDialChild(
                 child: const Icon(
                   Icons.add_a_photo,
@@ -170,43 +161,7 @@ class _GoldEditorPageState extends State<GoldEditorPage> {
             ],
           ),
         )
-        // IconButton(
-        //   padding: const EdgeInsets.only(right: 15),
-        //   onPressed: () {},
-        //   icon: Icon(
-        //     Icons.check_circle_outline,
-        //     color: Colors.grey.shade800,
-        //     size: 35,
-        //   ),
-        // ),
       ],
-    );
-  }
-
-  AppBar _appBar(BuildContext context) {
-    return AppBar(
-      leading: Consumer<GoldShopController>(
-        builder: (_, controller, __) => IconButton(
-          onPressed: () {
-            if (controller.currentEditGold.name.isNotEmpty) {
-              controller.currentEditGold = controller.newGold;
-              Navigator.pop(context, "Backbutton data");
-            } else {
-              controller.currentEditGold = controller.newGold;
-            }
-          },
-          icon: const Icon(
-            Icons.arrow_back_ios,
-            size: 30,
-            color: Colors.white,
-          ),
-        ),
-      ),
-      title: Consumer<GoldShopController>(
-        builder: (_, controller, __) => Text(
-            (controller.currentEditGold.name.isNotEmpty ? 'Edit' : 'Add') +
-                ' Gold Shop'),
-      ),
     );
   }
 
@@ -266,28 +221,11 @@ class _GoldEditorPageState extends State<GoldEditorPage> {
     );
   }
 
-  // Widget mainBody2() {
-  //   return SingleChildScrollView(
-  //     child: Form(
-  //       key: widget._formKey,
-  //       child: Column(
-  //         children: [
-  //           textFormField('Shop Name', _shopNameTextController),
-  //           textFormField('Sixteen Gold Price', _sixteenPrcTextController),
-  //           textFormField('Fifteen Gold Price', _fifteenPrcTextController),
-  //           textFormField('Phone No.', _fifteenPrcTextController),
-  //           textFormField('Facebook', _fifteenPrcTextController),
-  //           textFormField('Website', _fifteenPrcTextController),
-  //           textFormField('Created Date', _fifteenPrcTextController),
-  //           textFormField('Modified Date', _fifteenPrcTextController),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
-
   Widget textFormField(
-      String title, TextEditingController controller, bool isDate) {
+    String title,
+    TextEditingController controller,
+    bool isDate,
+  ) {
     return Container(
       width: ScreenSizeUtil.getScreenWidth(context) - 16,
       // height: 60,
@@ -306,29 +244,74 @@ class _GoldEditorPageState extends State<GoldEditorPage> {
             title,
             style: const TextStyle(color: Colors.black54),
           ),
-          TextField(
-            controller: controller,
-            readOnly: !isDate,
-            decoration: InputDecoration(
-              hintText: "Input $title",
-              // if you want to remove bottom border that changes color when field gains focus
-              // then uncomment the line bellow
-              // border: InputBorder.none,
-            ),
-            onTap: () async {
-              if (!isDate) {
-                return;
-              }
-              var date = await showDatePicker(
-                  context: context,
-                  initialDate: DateTime.now(),
-                  firstDate: DateTime(1900),
-                  lastDate: DateTime(2100));
-              controller.text = date.toString().substring(0, 10);
-            },
-          )
+          isDate
+              ? getDateTextField(title, controller)
+              : getTextField(title, controller),
         ],
       ),
+    );
+  }
+
+  getDateTextField(
+    String title,
+    TextEditingController controller,
+  ) {
+    return TextField(
+      controller: controller,
+      readOnly: false,
+      decoration: InputDecoration(
+        hintText: "Input $title",
+      ),
+      onTap: () async {
+        var date = await showDatePicker(
+            context: context,
+            initialDate: DateTime.now(),
+            firstDate: DateTime(1900),
+            lastDate: DateTime(2100));
+        controller.text = date.toString().substring(0, 10);
+      },
+    );
+  }
+
+  getTextField(
+    String title,
+    TextEditingController controller,
+  ) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        hintText: "Input $title",
+      ),
+    );
+  }
+
+  showWarningDialog() {
+    return warningDialog(
+      context,
+      'Are you sure you want to change data!',
+      'Update',
+      () {
+        GoldShopController(1).updateGoldData(
+          context,
+          gold.id,
+          {
+            'name': _shopNameTextController.text,
+            'sixteen_price': _sixteenPrcTextController.text,
+            'fifteen_price': _fifteenPrcTextController.text,
+            'phoneNo': _phoneNoTextController.text,
+            'website': _websiteTextController.text,
+            'facebook': _facebookTextController.text,
+            'created_date': Timestamp.fromDate(DateTime.parse(
+                _createdDateTextController.text)), //millisecondsSinceEpoch
+            'modified_date': Timestamp.fromDate(
+                DateTime.parse(_modifiedDateTextController.text)),
+          },
+        );
+        Navigator.of(context).pop();
+      },
+      () {
+        Navigator.of(context).pop();
+      },
     );
   }
 }

@@ -17,3 +17,32 @@ List<String> colors = [
   '#C595A5',
   '#C59595',
 ];
+
+warningDialog(
+  BuildContext context,
+  String title,
+  String submitLabel,
+  VoidCallback submitCallback,
+  VoidCallback cancelCallback,
+) {
+  return showDialog(
+      context: context,
+      builder: (BuildContext bContext) {
+        return AlertDialog(
+          title: Text(title),
+          actions: <Widget>[
+            ElevatedButton(
+              onPressed: () {
+                submitCallback.call();
+              },
+              child: Text(submitLabel),
+            ),
+            ElevatedButton(
+                onPressed: () {
+                  cancelCallback.call();
+                },
+                child: const Text('Cancel')),
+          ],
+        );
+      });
+}
