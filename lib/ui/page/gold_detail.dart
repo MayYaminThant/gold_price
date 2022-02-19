@@ -389,6 +389,10 @@ class _GoldDetailState extends State<GoldDetail> {
 
                       return null;
                     },
+                    textInputAction: TextInputAction.done,
+                    onFieldSubmitted: (String text) {
+                      print('then: $text');
+                    },
                   )
                 ],
               ),
