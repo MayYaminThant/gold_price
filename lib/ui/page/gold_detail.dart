@@ -391,7 +391,7 @@ class _GoldDetailState extends State<GoldDetail> {
                     },
                     textInputAction: TextInputAction.done,
                     onFieldSubmitted: (String text) {
-                      print('then: $text');
+                      // print('then: $text');
                     },
                   )
                 ],

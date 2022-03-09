@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:gold_price/common/common_widget.dart';
@@ -27,7 +27,6 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  final GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
   @override
   Widget build(BuildContext context) {
     CommonUtil.doInFuture(() {
@@ -50,58 +49,45 @@ class _MainPageState extends State<MainPage> {
   Consumer<GoldShopController> bottomNavBar() {
     return Consumer<GoldShopController>(
       builder: (_, goldController, __) => Consumer<BottomNavController>(
-        builder: (_, controller, __) => CurvedNavigationBar(
-          key: _bottomNavigationKey,
-          index: controller.selectedIndex,
-          height: 50.0,
-          items: <Widget>[
-            bottomNavIcon(Icons.home, controller.selectedIndex == 0),
-            bottomNavIcon(Icons.add, controller.selectedIndex == 1),
-            bottomNavIcon(Icons.calculate, controller.selectedIndex == 2),
-          ],
-          color: Colors.grey.shade400,
-          buttonBackgroundColor: Colors.blue,
-          backgroundColor: Colors.white,
-          animationCurve: Curves.ease,
-          animationDuration: const Duration(milliseconds: 600),
-          onTap: (index) {
-            Gold currentGold = goldController.currentEditGold;
-            if (controller.selectedIndex == 1 && currentGold.id != '0') {
-              showWarningDialog(controller, index);
-            } else {
-              controller.selectedIndex = index;
-            }
-          },
-          letIndexChange: (index) => true,
-        ),
-      ),
+          builder: (_, controller, __) => FancyBottomNavigation(
+                initialSelection: controller.selectedIndex,
+                tabs: [
+                  TabData(iconData: Icons.home, title: "Home"),
+                  TabData(
+                      iconData: Icons.search,
+                      title: goldController.currentEditGold.name.isNotEmpty
+                          ? "Update"
+                          : "Add"),
+                  TabData(iconData: Icons.shopping_cart, title: "Calculate")
+                ],
+                onTabChangedListener: (position) {
+                  Gold currentGold = goldController.currentEditGold;
+                  if (controller.selectedIndex == 1 &&
+                      currentGold.id != '0' &&
+                      currentGold.id != '') {
+                    _showWarningDialog(controller, position);
+                  } else {
+                    controller.selectedIndex = position;
+                  }
+                },
+              )),
     );
   }
 
-  Widget bottomNavIcon(IconData icon, bool isSelected) {
-    return Icon(icon,
-        size: 25, color: (isSelected ? Colors.white : Colors.black));
-  }
-
-  void showWarningDialog(BottomNavController controller, int index) {
-    CurvedNavigationBarState? navBarState = _bottomNavigationKey.currentState;
-
+  void _showWarningDialog(BottomNavController controller, int index) {
     warningDialog(
       context,
       'Current Editing is dismissed data!',
       'Go To',
       () {
         Navigator.of(context).pop();
-        Timer(const Duration(seconds: 4), () {
-          controller.selectedIndex = index;
-          navBarState?.setPage(index);
-        });
+        controller.selectedIndex = index;
       },
       () {
+        var preIndex = controller.selectedIndex;
+        controller.selectedIndex = index;
+        controller.selectedIndex = preIndex;
         Navigator.of(context).pop();
-        Timer(const Duration(seconds: 4), () {
-          navBarState?.setPage(controller.selectedIndex);
-        });
       },
     );
   }
