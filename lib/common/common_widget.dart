@@ -25,9 +25,11 @@ warningDialog(
   VoidCallback submitCallback,
   VoidCallback cancelCallback,
 ) {
+  BuildContext dialogContext;
   return showDialog(
       context: context,
       builder: (BuildContext bContext) {
+        dialogContext = bContext;
         return AlertDialog(
           title: Text(title),
           actions: <Widget>[
@@ -38,8 +40,9 @@ warningDialog(
               child: Text(submitLabel),
             ),
             ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   cancelCallback.call();
+  await _longOperation();
                 },
                 child: const Text('Cancel')),
           ],

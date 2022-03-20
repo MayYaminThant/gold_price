@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
@@ -27,6 +25,7 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
+  GlobalKey _bottomNavigationKey = GlobalKey();
   @override
   Widget build(BuildContext context) {
     CommonUtil.doInFuture(() {
@@ -41,15 +40,16 @@ class _MainPageState extends State<MainPage> {
                 builder: (_, controller, __) =>
                     bodyTags.elementAt(controller.selectedIndex))),
         endDrawer: _drawerLayout(),
-        bottomNavigationBar: bottomNavBar(),
+        bottomNavigationBar: bottomNavBar(_bottomNavigationKey),
       ),
     );
   }
 
-  Consumer<GoldShopController> bottomNavBar() {
+  Consumer<GoldShopController> bottomNavBar(GlobalKey _bottomNavigationKey) {
     return Consumer<GoldShopController>(
       builder: (_, goldController, __) => Consumer<BottomNavController>(
           builder: (_, controller, __) => FancyBottomNavigation(
+                key: _bottomNavigationKey,
                 initialSelection: controller.selectedIndex,
                 tabs: [
                   TabData(iconData: Icons.home, title: "Home"),
@@ -65,7 +65,11 @@ class _MainPageState extends State<MainPage> {
                   if (controller.selectedIndex == 1 &&
                       currentGold.id != '0' &&
                       currentGold.id != '') {
-                    _showWarningDialog(controller, position);
+                    _showWarningDialog(
+                      goldController,
+                      controller,
+                      position,
+                    );
                   } else {
                     controller.selectedIndex = position;
                   }
@@ -74,20 +78,28 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  void _showWarningDialog(BottomNavController controller, int index) {
+  void _showWarningDialog(
+    GoldShopController goldController,
+    BottomNavController controller,
+    int index,
+  ) {
+    FancyBottomNavigationState? navBarState =
+        _bottomNavigationKey.currentState as FancyBottomNavigationState?;
     warningDialog(
       context,
       'Current Editing is dismissed data!',
       'Go To',
       () {
         Navigator.of(context).pop();
+        goldController.currentEditGold = goldController.newGold;
         controller.selectedIndex = index;
       },
       () {
+        Navigator.of(context).pop();
         var preIndex = controller.selectedIndex;
         controller.selectedIndex = index;
         controller.selectedIndex = preIndex;
-        Navigator.of(context).pop();
+        navBarState?.setPage(controller.selectedIndex);
       },
     );
   }
