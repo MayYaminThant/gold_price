@@ -7,7 +7,10 @@ import 'package:gold_price/controller/gold_shop_controller.dart';
 import 'package:gold_price/model/gold.dart';
 import 'package:gold_price/util/common_util.dart';
 import 'package:gold_price/util/screen_util.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+
+import '../../common/color_extension.dart';
 
 class GoldEditorPage extends StatefulWidget {
   const GoldEditorPage({Key? key}) : super(key: key);
@@ -30,6 +33,20 @@ class _GoldEditorPageState extends State<GoldEditorPage> {
   final TextEditingController _modifiedDateTextController =
       TextEditingController();
   late Gold gold;
+
+  @override
+  void dispose() {
+    _shopNameTextController.dispose();
+    _sixteenPrcTextController.dispose();
+    _fifteenPrcTextController.dispose();
+    _phoneNoTextController.dispose();
+    _facebookTextController.dispose();
+    _websiteTextController.dispose();
+    _createdDateTextController.dispose();
+    _modifiedDateTextController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     CommonUtil.doInFuture(() {
@@ -63,19 +80,30 @@ class _GoldEditorPageState extends State<GoldEditorPage> {
       leading: Consumer<GoldShopController>(
         builder: (_, controller, __) => IconButton(
           onPressed: () {
-            if (controller.currentEditGold.name.isNotEmpty) {
-              controller.currentEditGold = controller.newGold;
-              Navigator.pop(context, "Backbutton data");
+            if (!controller.isEditing) {
+              if (controller.currentEditGold.name.isNotEmpty) {
+                controller.currentEditGold = controller.newGold;
+                Navigator.pop(context, "Backbutton data");
+              } else {
+                controller.currentEditGold = controller.newGold;
+                context.read<BottomNavController>().selectedIndex = 0;
+              }
             } else {
-              controller.currentEditGold = controller.newGold;
-              context.read<BottomNavController>().selectedIndex = 0;
+              controller.isEditing = false;
+              setState(() {});
             }
           },
-          icon: const Icon(
-            Icons.arrow_back_ios,
-            size: 30,
-            color: Colors.white,
-          ),
+          icon: controller.isEditing
+              ? const Icon(
+                  Icons.close,
+                  size: 30,
+                  color: Colors.white,
+                )
+              : const Icon(
+                  Icons.arrow_back_ios,
+                  size: 30,
+                  color: Colors.white,
+                ),
         ),
       ),
       title: Consumer<GoldShopController>(
@@ -157,6 +185,9 @@ class _GoldEditorPageState extends State<GoldEditorPage> {
                   color: Colors.blueGrey,
                   size: 33,
                 ),
+                onTap: () {
+                  _showImagePickerDialog(context);
+                },
               ),
             ],
           ),
@@ -169,12 +200,19 @@ class _GoldEditorPageState extends State<GoldEditorPage> {
     return CustomScrollView(
       slivers: <Widget>[
         _getAppBar(),
+        const SliverToBoxAdapter(
+          child: SizedBox(),
+        ),
         SliverToBoxAdapter(
             child: textFormField(
           'Shop Name',
           _shopNameTextController,
           false,
         )),
+        // CustomScrollView(
+        //   scrollDirection: Axis.horizontal,
+        //   slivers: [_getColorSliverList(context)],
+        // ),
         SliverToBoxAdapter(
             child: textFormField(
           'Sixteen Gold Price',
@@ -277,10 +315,15 @@ class _GoldEditorPageState extends State<GoldEditorPage> {
     String title,
     TextEditingController controller,
   ) {
-    return TextField(
-      controller: controller,
-      decoration: InputDecoration(
-        hintText: "Input $title",
+    return Consumer<GoldShopController>(
+      builder: (_, goldcontroller, __) => TextFormField(
+        controller: controller,
+        decoration: InputDecoration(
+          hintText: "Input $title",
+        ),
+        onChanged: (value) {
+          goldcontroller.isEditing = true;
+        },
       ),
     );
   }
@@ -312,6 +355,87 @@ class _GoldEditorPageState extends State<GoldEditorPage> {
       () {
         Navigator.of(context).pop();
       },
+    );
+  }
+
+  Future<void> _showImagePickerDialog(BuildContext context) {
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text(
+              "Choose option",
+              style: TextStyle(color: Colors.blue),
+            ),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: [
+                  const Divider(
+                    height: 1,
+                    color: Colors.blue,
+                  ),
+                  Consumer<GoldShopController>(
+                    builder: (_, controller, __) => ListTile(
+                      onTap: () {
+                        _openGalleryOrCamera(
+                            context, ImageSource.gallery, controller);
+                      },
+                      title: const Text("Gallery"),
+                      leading: const Icon(
+                        Icons.account_box,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  ),
+                  const Divider(
+                    height: 1,
+                    color: Colors.blue,
+                  ),
+                  Consumer<GoldShopController>(
+                    builder: (_, controller, __) => ListTile(
+                      onTap: () {
+                        _openGalleryOrCamera(
+                            context, ImageSource.camera, controller);
+                      },
+                      title: const Text("Camera"),
+                      leading: const Icon(
+                        Icons.camera,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
+  void _openGalleryOrCamera(
+    BuildContext context,
+    ImageSource source,
+    GoldShopController controller,
+  ) async {
+    controller.uploadPic(context, source, controller);
+  }
+
+  // SliverList _getColorSliverList(BuildContext context) {
+  //   return SliverList(
+  //     delegate: SliverChildBuilderDelegate(
+  //       (BuildContext context, int index) {
+  //         return buildRow(colors[index]);
+  //       },
+  //       childCount: colors.length,
+  //     ),
+  //   );
+  // }
+
+  buildRow(String color) {
+    return Container(
+      decoration: BoxDecoration(
+        color: ColorExtension.fromHex(color),
+        borderRadius: BorderRadius.circular(15),
+      ),
     );
   }
 }

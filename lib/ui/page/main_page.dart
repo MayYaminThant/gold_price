@@ -1,4 +1,3 @@
-import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:gold_price/common/common_widget.dart';
@@ -25,7 +24,6 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  GlobalKey _bottomNavigationKey = GlobalKey();
   @override
   Widget build(BuildContext context) {
     CommonUtil.doInFuture(() {
@@ -35,32 +33,41 @@ class _MainPageState extends State<MainPage> {
       child: Scaffold(
         backgroundColor: Colors.grey.shade300,
         body: GestureDetector(
-            onTap: () {},
-            child: Consumer<BottomNavController>(
-                builder: (_, controller, __) =>
-                    bodyTags.elementAt(controller.selectedIndex))),
+          onTap: () {},
+          child: Consumer<BottomNavController>(
+            builder: (_, controller, __) =>
+                bodyTags.elementAt(controller.selectedIndex),
+            // const CalculatePage(),
+          ),
+        ),
         endDrawer: _drawerLayout(),
-        bottomNavigationBar: bottomNavBar(_bottomNavigationKey),
+        bottomNavigationBar: bottomNavBar(),
       ),
     );
   }
 
-  Consumer<GoldShopController> bottomNavBar(GlobalKey _bottomNavigationKey) {
+  Consumer<GoldShopController> bottomNavBar() {
     return Consumer<GoldShopController>(
       builder: (_, goldController, __) => Consumer<BottomNavController>(
-          builder: (_, controller, __) => FancyBottomNavigation(
-                key: _bottomNavigationKey,
-                initialSelection: controller.selectedIndex,
-                tabs: [
-                  TabData(iconData: Icons.home, title: "Home"),
-                  TabData(
-                      iconData: Icons.search,
-                      title: goldController.currentEditGold.name.isNotEmpty
-                          ? "Update"
-                          : "Add"),
-                  TabData(iconData: Icons.shopping_cart, title: "Calculate")
+          builder: (_, controller, __) => BottomNavigationBar(
+                currentIndex: controller.selectedIndex,
+                items: [
+                  const BottomNavigationBarItem(
+                    icon: Icon(Icons.home),
+                    label: "Home",
+                  ),
+                  BottomNavigationBarItem(
+                    icon: const Icon(Icons.search),
+                    label: goldController.currentEditGold.name.isNotEmpty
+                        ? "Update"
+                        : "Add",
+                  ),
+                  const BottomNavigationBarItem(
+                    icon: Icon(Icons.shopping_cart),
+                    label: "Calculate",
+                  ),
                 ],
-                onTabChangedListener: (position) {
+                onTap: (position) {
                   Gold currentGold = goldController.currentEditGold;
                   if (controller.selectedIndex == 1 &&
                       currentGold.id != '0' &&
@@ -83,8 +90,8 @@ class _MainPageState extends State<MainPage> {
     BottomNavController controller,
     int index,
   ) {
-    FancyBottomNavigationState? navBarState =
-        _bottomNavigationKey.currentState as FancyBottomNavigationState?;
+    // FancyBottomNavigationState? navBarState =
+    //     _bottomNavigationKey.currentState as FancyBottomNavigationState?;
     warningDialog(
       context,
       'Current Editing is dismissed data!',
@@ -99,7 +106,7 @@ class _MainPageState extends State<MainPage> {
         var preIndex = controller.selectedIndex;
         controller.selectedIndex = index;
         controller.selectedIndex = preIndex;
-        navBarState?.setPage(controller.selectedIndex);
+        // navBarState?.setPage(controller.selectedIndex);
       },
     );
   }

@@ -1,9 +1,14 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:gold_price/model/gold.dart';
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:path/path.dart' as path;
 
 class GoldShopController with ChangeNotifier {
   GoldShopController(this._goldShopSelectedIndex);
@@ -25,6 +30,19 @@ class GoldShopController with ChangeNotifier {
 
   bool _isAscending = true;
   bool get isAscending => _isAscending;
+
+  bool _isEditing = true;
+  bool get isEditing => _isEditing;
+
+  // ignore: prefer_final_fields
+  Image _goldImage = Image.asset('assets/images/4.jpg');
+  Image get goldImage => _goldImage;
+
+  set goldImage(Image pickedFile) {
+    if (_goldImage == pickedFile) return;
+    _goldImage = pickedFile;
+    notifyListeners();
+  }
 
   Gold newGold = Gold(
     id: '0',
@@ -110,6 +128,12 @@ class GoldShopController with ChangeNotifier {
   set goldShopSelectedIndex(int goldShopSelectedIndex) {
     if (_goldShopSelectedIndex == goldShopSelectedIndex) return;
     _goldShopSelectedIndex = goldShopSelectedIndex;
+    notifyListeners();
+  }
+
+  set isEditing(bool isEditing) {
+    if (isEditing == _isEditing) return;
+    _isEditing = isEditing;
     notifyListeners();
   }
 
@@ -241,5 +265,33 @@ class GoldShopController with ChangeNotifier {
         onPressed: dismissCallback,
       ),
     );
+  }
+
+  Future uploadPic(
+    BuildContext context,
+    ImageSource source,
+    GoldShopController controller,
+  ) async {
+    FirebaseStorage storage = FirebaseStorage.instance;
+
+    try {
+      XFile? pickedFile = await ImagePicker().pickImage(
+        source: source,
+      );
+      final String fileName = path.basename(pickedFile!.path);
+      File imageFile = File(pickedFile.path);
+      try {
+        await storage.ref(fileName).putFile(imageFile).then((snapshot) =>
+            currentEditGold.imageUrl = snapshot.ref.getDownloadURL() as String);
+      } on FirebaseException catch (e) {
+        if (kDebugMode) {
+          print(e);
+        }
+      }
+    } catch (err) {
+      if (kDebugMode) {
+        print(err);
+      }
+    }
   }
 }

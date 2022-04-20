@@ -3,7 +3,7 @@ import 'dart:core';
 class Gold {
   final String id;
   final String name;
-  final String imageUrl;
+  late final String imageUrl;
   final String goldShopPassword;
   final String sixteenPrice;
   final String fifteenPrice;

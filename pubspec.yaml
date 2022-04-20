@@ -57,18 +57,24 @@ dependencies:
   # Published Aug 26, 2021• Published by a pub.dev verified publisherfirebase.google.com
   # Flutter plugin for Firebase Core, enabling connecting to multiple Firebase apps.
   firebase_core: ^1.6.0
-  # firebase_auth: ^1.0.0
+  firebase_auth: ^1.0.0
   
   intl: ^0.17.0
   
   syncfusion_flutter_charts: ^19.3.48
   url_launcher: ^6.0.12
   linkable: ^3.0.1
-  fancy_bottom_navigation: ^0.3.3
   flutter_speed_dial: ^5.0.0+1
+  image_picker: ^0.8.4+11
+  flutter_material_color_picker: ^1.1.0+2
+
+  # for using multi sliver list
+  sliver_tools: ^0.2.5
 
   # for using checkBox and toggle in the right drawer
   getwidget: ^2.0.4
+  # The path package provides common operations for manipulating paths: joining, splitting, normalizing, etc.
+  path: ^1.8.1
 
 dev_dependencies:
   flutter_test:
