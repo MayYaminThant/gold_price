@@ -75,6 +75,8 @@ dependencies:
   getwidget: ^2.0.4
   # The path package provides common operations for manipulating paths: joining, splitting, normalizing, etc.
   path: ^1.8.1
+  # This package allows you to draw dotted lines with Flutter. You can draw a beautiful dotted line.
+  dotted_line: ^3.1.0
 
 dev_dependencies:
   flutter_test:

@@ -4,7 +4,7 @@ import 'package:gold_price/common/common_widget.dart';
 import 'package:gold_price/controller/bottom_nav_controller.dart';
 import 'package:gold_price/controller/gold_shop_controller.dart';
 import 'package:gold_price/model/gold.dart';
-import 'package:gold_price/ui/page/calulate_page.dart';
+import 'package:gold_price/ui/page/calculate_page.dart';
 import 'package:gold_price/ui/page/gold_editor_page.dart';
 import 'package:gold_price/ui/page/home_page.dart';
 import 'package:gold_price/util/common_util.dart';

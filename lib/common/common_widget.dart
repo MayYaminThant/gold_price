@@ -18,6 +18,20 @@ List<String> colors = [
   '#C59595',
 ];
 
+Map<int, Color> colorList = const {
+  50: Color.fromRGBO(163, 191, 212, 1),
+  100: Color.fromRGBO(198, 218, 176, 2),
+  200: Color.fromRGBO(218, 186, 195, 1),
+  300: Color.fromRGBO(212, 198, 163, 1),
+  400: Color.fromRGBO(218, 176, 176, 1),
+  450: Color.fromRGBO(163, 212, 185, 1),
+  500: Color.fromRGBO(210, 176, 218, 1),
+  600: Color.fromRGBO(129, 111, 122, 1),
+  700: Color.fromRGBO(163, 126, 77, 1),
+  800: Color.fromRGBO(197, 149, 165, 1),
+  900: Color.fromRGBO(197, 149, 149, 1),
+};
+
 warningDialog(
   BuildContext context,
   String title,

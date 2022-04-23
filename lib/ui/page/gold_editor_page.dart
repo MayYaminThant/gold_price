@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:gold_price/common/common_widget.dart';
 import 'package:gold_price/controller/bottom_nav_controller.dart';
@@ -32,7 +33,7 @@ class _GoldEditorPageState extends State<GoldEditorPage> {
       TextEditingController();
   final TextEditingController _modifiedDateTextController =
       TextEditingController();
-  late Gold gold;
+  Gold? gold = null;
 
   @override
   void dispose() {
@@ -51,19 +52,22 @@ class _GoldEditorPageState extends State<GoldEditorPage> {
   Widget build(BuildContext context) {
     CommonUtil.doInFuture(() {
       gold = context.read<GoldShopController>().currentEditGold;
-      _shopNameTextController.text = gold.name;
-      _sixteenPrcTextController.text = gold.sixteenPrice;
-      _fifteenPrcTextController.text = gold.fifteenPrice;
-      _phoneNoTextController.text = gold.phoneNo;
-      _facebookTextController.text = gold.facebook;
-      _websiteTextController.text = gold.website;
-      _createdDateTextController.text = gold.createdDate;
-      _modifiedDateTextController.text = gold.modifiedDate;
+      _shopNameTextController.text = gold!.name;
+      _sixteenPrcTextController.text = gold!.sixteenPrice;
+      _fifteenPrcTextController.text = gold!.fifteenPrice;
+      _phoneNoTextController.text = gold!.phoneNo;
+      _facebookTextController.text = gold!.facebook;
+      _websiteTextController.text = gold!.website;
+      _createdDateTextController.text = gold!.createdDate;
+      _modifiedDateTextController.text = gold!.modifiedDate;
     });
     return SafeArea(
         child: WillPopScope(
       onWillPop: () => Future.value(false),
       child: Scaffold(
+        backgroundColor: gold != null && gold!.color != ""
+            ? ColorExtension.fromHex(gold!.color)
+            : Colors.white,
         // appBar: appBar(context),
         body: _mainBody(),
       ),
@@ -214,6 +218,17 @@ class _GoldEditorPageState extends State<GoldEditorPage> {
         //   slivers: [_getColorSliverList(context)],
         // ),
         SliverToBoxAdapter(
+            child: MaterialColorPicker(
+          iconSelected: Icons.api,
+          circleSize: 39,
+          selectedColor: gold != null && gold!.color != ""
+              ? ColorExtension.fromHex(gold!.color)
+              : Colors.white,
+          onColorChange: (changedColor) {
+            // gold!.color = changedColor.value.toRadixString(16);
+          },
+        )),
+        SliverToBoxAdapter(
             child: textFormField(
           'Sixteen Gold Price',
           _sixteenPrcTextController,
@@ -267,26 +282,11 @@ class _GoldEditorPageState extends State<GoldEditorPage> {
     return Container(
       width: ScreenSizeUtil.getScreenWidth(context) - 16,
       // height: 60,
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(2),
       margin: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        border: Border.all(
-            color: Colors.black, width: 1.0, style: BorderStyle.solid),
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Text(
-            title,
-            style: const TextStyle(color: Colors.black54),
-          ),
-          isDate
-              ? getDateTextField(title, controller)
-              : getTextField(title, controller),
-        ],
-      ),
+      child: isDate
+          ? getDateTextField(title, controller)
+          : getTextField(title, controller),
     );
   }
 
@@ -296,9 +296,18 @@ class _GoldEditorPageState extends State<GoldEditorPage> {
   ) {
     return TextField(
       controller: controller,
-      readOnly: false,
+      readOnly: true,
       decoration: InputDecoration(
-        hintText: "Input $title",
+        labelText: title,
+        border: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: Colors.grey.withAlpha(80),
+            width: 0,
+          ),
+          borderRadius: const BorderRadius.all(
+            Radius.circular(8),
+          ),
+        ),
       ),
       onTap: () async {
         var date = await showDatePicker(
@@ -319,7 +328,25 @@ class _GoldEditorPageState extends State<GoldEditorPage> {
       builder: (_, goldcontroller, __) => TextFormField(
         controller: controller,
         decoration: InputDecoration(
-          hintText: "Input $title",
+          labelText: title,
+          border: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(8),
+            ),
+            borderSide: BorderSide(
+              color: Colors.grey,
+              width: 1,
+            ),
+          ),
+          focusedBorder: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(8),
+            ),
+            borderSide: BorderSide(
+              color: Color.fromARGB(255, 0, 101, 234),
+              width: 2.5,
+            ),
+          ),
         ),
         onChanged: (value) {
           goldcontroller.isEditing = true;
@@ -336,7 +363,7 @@ class _GoldEditorPageState extends State<GoldEditorPage> {
       () {
         GoldShopController(1).updateGoldData(
           context,
-          gold.id,
+          gold!.id,
           {
             'name': _shopNameTextController.text,
             'sixteen_price': _sixteenPrcTextController.text,
