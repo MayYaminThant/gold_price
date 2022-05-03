@@ -10,6 +10,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
 
+import '../common/common_widget.dart';
+
 class GoldShopController with ChangeNotifier {
   GoldShopController(this._goldShopSelectedIndex);
 
@@ -57,6 +59,8 @@ class GoldShopController with ChangeNotifier {
     createdDate: '',
     modifiedDate: '',
     color: '',
+    sixteenPriceList: [],
+    fifteenPriceList: [],
   );
 
   Gold _currentEditGold = Gold(
@@ -72,6 +76,8 @@ class GoldShopController with ChangeNotifier {
     createdDate: '',
     modifiedDate: '',
     color: '',
+    sixteenPriceList: [],
+    fifteenPriceList: [],
   );
   Gold get currentEditGold => _currentEditGold;
 
@@ -97,6 +103,8 @@ class GoldShopController with ChangeNotifier {
       createdDate: '',
       modifiedDate: '',
       color: '',
+      sixteenPriceList: [],
+      fifteenPriceList: [],
     );
 
     notifyListeners();
@@ -170,6 +178,10 @@ class GoldShopController with ChangeNotifier {
           createdDate: createdDate,
           modifiedDate: modifiedDate,
           color: element.data()['color_hex'] ?? '',
+          sixteenPriceList:
+              element.data()['sixteen_price_list'].cast<String>() ?? [],
+          fifteenPriceList:
+              element.data()['fifteen_price_list'].cast<String>() ?? [],
         );
         var existingItem = _goldShopLst.firstWhere(
             (itemToCheck) => goldObj.isEqual(itemToCheck),
@@ -178,8 +190,8 @@ class GoldShopController with ChangeNotifier {
           _goldShopLst.add(goldObj);
           setFilterGoldLst();
         }
+        notifyListeners();
       }
-      notifyListeners();
     });
   }
 
@@ -241,11 +253,12 @@ class GoldShopController with ChangeNotifier {
         .doc(id)
         .update(data)
         .then((value) {
+      notifyListeners();
       final snackBar =
           showSnackBar('Updated Successful', Colors.green.shade200, () {});
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      currentEditGold = data as Gold;
       getGoldShopData();
-      notifyListeners();
     }).catchError(
       (error) {
         final snackBar =

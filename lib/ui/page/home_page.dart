@@ -120,6 +120,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget gridImage(Gold gold, Color colorPr) {
+    bool isUpRange = (gold.sixteenPriceList.length > 2 &&
+            (double.parse(gold.sixteenPriceList.last) >=
+                double.parse(gold.sixteenPriceList
+                    .elementAt(gold.sixteenPriceList.length - 2)))) ||
+        (gold.sixteenPriceList.length == 1);
     return Container(
       padding: const EdgeInsets.only(top: 20),
       alignment: Alignment.topCenter,
@@ -127,9 +132,11 @@ class _HomePageState extends State<HomePage> {
         borderRadius: BorderRadius.circular(20),
         color: colorPr,
       ),
-      child: const Icon(
-        Icons.arrow_circle_up_rounded,
-        color: Colors.red,
+      child: Icon(
+        isUpRange
+            ? Icons.arrow_circle_up_rounded
+            : Icons.arrow_circle_down_rounded,
+        color: isUpRange ? Colors.red : Colors.yellow,
         size: 40,
       ),
     );

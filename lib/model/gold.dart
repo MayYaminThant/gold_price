@@ -12,7 +12,9 @@ class Gold {
   final String facebook;
   final String createdDate;
   final String modifiedDate;
-  final String color;
+  late final String color;
+  final List<String> sixteenPriceList;
+  final List<String> fifteenPriceList;
 
   Gold({
     required this.id,
@@ -27,6 +29,8 @@ class Gold {
     required this.createdDate,
     required this.modifiedDate,
     required this.color,
+    required this.sixteenPriceList,
+    required this.fifteenPriceList,
   });
 
   isEqual(Gold object) {
@@ -43,7 +47,9 @@ class Gold {
         object.facebook == facebook &&
         object.createdDate == createdDate &&
         object.modifiedDate == modifiedDate &&
-        object.color == color) {
+        object.color == color &&
+        object.sixteenPriceList == sixteenPriceList &&
+        object.fifteenPriceList == fifteenPriceList) {
       return true;
     } else {
       return false;

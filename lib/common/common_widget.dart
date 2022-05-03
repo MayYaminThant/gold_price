@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../model/gold.dart';
+
 Color get grey300 {
   return Colors.grey.shade200;
 }
@@ -62,3 +64,5 @@ warningDialog(
         );
       });
 }
+
+typedef GetGoldCallBack = void Function(Gold gold);

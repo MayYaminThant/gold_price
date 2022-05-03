@@ -33,7 +33,7 @@ class _GoldEditorPageState extends State<GoldEditorPage> {
       TextEditingController();
   final TextEditingController _modifiedDateTextController =
       TextEditingController();
-  Gold? gold = null;
+  Gold? gold;
 
   @override
   void dispose() {
@@ -64,12 +64,14 @@ class _GoldEditorPageState extends State<GoldEditorPage> {
     return SafeArea(
         child: WillPopScope(
       onWillPop: () => Future.value(false),
-      child: Scaffold(
-        backgroundColor: gold != null && gold!.color != ""
-            ? ColorExtension.fromHex(gold!.color)
-            : Colors.white,
-        // appBar: appBar(context),
-        body: _mainBody(),
+      child: Consumer<GoldShopController>(
+        builder: (_, controller, __) => Scaffold(
+          backgroundColor: controller.currentEditGold.color != ""
+              ? ColorExtension.fromHex(gold!.color)
+              : Colors.white,
+          // appBar: appBar(context),
+          body: _mainBody(),
+        ),
       ),
     ));
   }
@@ -218,16 +220,22 @@ class _GoldEditorPageState extends State<GoldEditorPage> {
         //   slivers: [_getColorSliverList(context)],
         // ),
         SliverToBoxAdapter(
-            child: MaterialColorPicker(
-          iconSelected: Icons.api,
-          circleSize: 39,
-          selectedColor: gold != null && gold!.color != ""
-              ? ColorExtension.fromHex(gold!.color)
-              : Colors.white,
-          onColorChange: (changedColor) {
-            // gold!.color = changedColor.value.toRadixString(16);
-          },
-        )),
+          child: Consumer<GoldShopController>(
+            builder: (_, goldCon, __) => MaterialColorPicker(
+              iconSelected: Icons.api,
+              circleSize: 39,
+              selectedColor: gold != null && gold!.color != ""
+                  ? ColorExtension.fromHex(gold!.color)
+                  : Colors.white,
+              onColorChange: (changedColor) {
+                if (changedColor != null) {
+                  goldCon.currentEditGold.color =
+                      changedColor.value.toRadixString(16);
+                }
+              },
+            ),
+          ),
+        ),
         SliverToBoxAdapter(
             child: textFormField(
           'Sixteen Gold Price',
@@ -356,6 +364,22 @@ class _GoldEditorPageState extends State<GoldEditorPage> {
   }
 
   showWarningDialog() {
+    if (gold!.sixteenPriceList.isNotEmpty &&
+        double.parse(_sixteenPrcTextController.text) !=
+            double.parse(gold!.sixteenPriceList.last)) {
+      if (gold!.sixteenPriceList.length == 10) {
+        gold!.sixteenPriceList.removeAt(0);
+      }
+      gold!.sixteenPriceList.add(_sixteenPrcTextController.text);
+    }
+    if (gold!.fifteenPriceList.isNotEmpty &&
+        double.parse(_fifteenPrcTextController.text) !=
+            double.parse(gold!.fifteenPriceList.last)) {
+      if (gold!.sixteenPriceList.length == 10) {
+        gold!.fifteenPriceList.removeAt(0);
+      }
+      gold!.fifteenPriceList.add(_fifteenPrcTextController.text);
+    }
     return warningDialog(
       context,
       'Are you sure you want to change data!',
@@ -375,6 +399,8 @@ class _GoldEditorPageState extends State<GoldEditorPage> {
                 _createdDateTextController.text)), //millisecondsSinceEpoch
             'modified_date': Timestamp.fromDate(
                 DateTime.parse(_modifiedDateTextController.text)),
+            'sixteen_price_list': gold!.sixteenPriceList,
+            'fifteen_price_list': gold!.fifteenPriceList,
           },
         );
         Navigator.of(context).pop();

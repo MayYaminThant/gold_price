@@ -24,6 +24,11 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
+  Future _refreshCallback() async {
+    await Future.delayed(const Duration(seconds: 1));
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     CommonUtil.doInFuture(() {
@@ -32,12 +37,22 @@ class _MainPageState extends State<MainPage> {
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.grey.shade300,
-        body: GestureDetector(
-          onTap: () {},
-          child: Consumer<BottomNavController>(
-            builder: (_, controller, __) =>
-                bodyTags.elementAt(controller.selectedIndex),
-            // const CalculatePage(),
+        body: Container(
+          color: Colors.transparent,
+          child: RefreshIndicator(
+            onRefresh: _refreshCallback,
+            backgroundColor: Colors.grey,
+            color: Colors.white12,
+            displacement: 165,
+            strokeWidth: 3,
+            child: GestureDetector(
+              onTap: () {},
+              child: Consumer<BottomNavController>(
+                builder: (_, controller, __) =>
+                    bodyTags.elementAt(controller.selectedIndex),
+                // const CalculatePage(),
+              ),
+            ),
           ),
         ),
         endDrawer: _drawerLayout(),
