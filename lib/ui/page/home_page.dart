@@ -10,10 +10,10 @@ import 'package:provider/provider.dart';
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
   @override
-  _HomePageState createState() => _HomePageState();
+  HomePageState createState() => HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class HomePageState extends State<HomePage> {
   final _textController = TextEditingController();
 
   @override
@@ -112,19 +112,19 @@ class _HomePageState extends State<HomePage> {
       },
       child: SizedBox(
         child: GridTile(
-          child: gridImage(gold, colorPr),
           footer: gridFooter(gold, colorPr),
+          child: gridImage(gold, colorPr),
         ),
       ),
     );
   }
 
   Widget gridImage(Gold gold, Color colorPr) {
-    bool isUpRange = (gold.sixteenPriceList.length > 2 &&
-            (double.parse(gold.sixteenPriceList.last) >=
-                double.parse(gold.sixteenPriceList
-                    .elementAt(gold.sixteenPriceList.length - 2)))) ||
-        (gold.sixteenPriceList.length == 1);
+    bool isUpRange = (gold.sixteenPriceList.values.length > 2 &&
+            (double.parse(gold.sixteenPriceList.values.last) >=
+                double.parse(gold.sixteenPriceList.values
+                    .elementAt(gold.sixteenPriceList.values.length - 2)))) ||
+        (gold.sixteenPriceList.values.length == 1);
     return Container(
       padding: const EdgeInsets.only(top: 20),
       alignment: Alignment.topCenter,

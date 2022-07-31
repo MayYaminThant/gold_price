@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -8,10 +9,8 @@ import 'package:gold_price/model/gold.dart';
 import 'package:gold_price/model/gold_price_rate.dart';
 import 'package:gold_price/util/screen_util.dart';
 import 'package:intl/intl.dart';
-import 'package:linkable/linkable.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import 'main_page.dart';
 
@@ -20,10 +19,10 @@ class GoldDetail extends StatefulWidget {
   final Gold gold;
 
   @override
-  _GoldDetailState createState() => _GoldDetailState();
+  GoldDetailState createState() => GoldDetailState();
 }
 
-class _GoldDetailState extends State<GoldDetail> {
+class GoldDetailState extends State<GoldDetail> {
   final TextEditingController titleController = TextEditingController();
   final TextEditingController pswController = TextEditingController();
   final GlobalKey<FormState> _keyDialogForm = GlobalKey<FormState>();
@@ -39,10 +38,27 @@ class _GoldDetailState extends State<GoldDetail> {
             scrollBehavior: const ScrollBehavior(),
             slivers: <Widget>[
               sliverAppBar(),
-              sliverAppBarForPrice('16 ပဲရည်', ': ' + widget.gold.sixteenPrice),
-              sliverAppBarForPrice('15 ပဲရည်', ': ' + widget.gold.fifteenPrice),
+              sliverAppBarForPrice('16 ပဲရည်', ': ${widget.gold.sixteenPrice}'),
+              sliverAppBarForPrice('15 ပဲရည်', ': ${widget.gold.fifteenPrice}'),
               sliverListCard(textTheme, infoView()),
-              sliverListCard(textTheme, chartWidget()),
+              sliverListCard(
+                textTheme,
+                // SizedBox(
+                //   width: double.infinity,
+                //   child: SingleChildScrollView(
+                //     scrollDirection: Axis.horizontal,
+                //     child:
+                chartWidget(widget.gold.sixteenPriceList),
+                //   ),
+                // ),
+              ),
+              const SliverPadding(
+                sliver: SliverToBoxAdapter(
+                    child: SizedBox(
+                  height: 50,
+                )),
+                padding: EdgeInsets.all(0),
+              ),
             ],
           ),
         ),
@@ -124,13 +140,13 @@ class _GoldDetailState extends State<GoldDetail> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            detailContainerUI(
+            _detailContainerUI(
               title,
               Colors.black,
               (ScreenSizeUtil.getScreenWidth(context) / 2) - 30,
               ServiceAction.none,
             ),
-            detailContainerUI(
+            _detailContainerUI(
               value,
               Colors.black,
               (ScreenSizeUtil.getScreenWidth(context) / 2) - 30,
@@ -175,6 +191,7 @@ class _GoldDetailState extends State<GoldDetail> {
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
       ),
+      initiallyExpanded: true,
       children: [
         goldDetailRow('Phone No.', widget.gold.phoneNo, ServiceAction.phone),
         goldDetailRow('Facebook', widget.gold.facebook, ServiceAction.facebook),
@@ -199,7 +216,7 @@ class _GoldDetailState extends State<GoldDetail> {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          detailContainerUI(
+          _detailContainerUI(
             key,
             Colors.grey.shade700,
             (ScreenSizeUtil.getScreenWidth(context) / 3),
@@ -213,41 +230,24 @@ class _GoldDetailState extends State<GoldDetail> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          detailContainerUI(value, Colors.grey.shade700,
-              (ScreenSizeUtil.getScreenWidth(context) / 2), action),
+          _detailContainerUI(
+            value,
+            action == ServiceAction.none ? Colors.black : Colors.blue,
+            (ScreenSizeUtil.getScreenWidth(context) / 2),
+            action,
+          ),
         ],
       ),
     );
   }
 
-  Widget detailContainerUIWithLink(String value, ServiceAction action) {
-    return ElevatedButton(
-        onPressed: () {
-          switch (action) {
-            case ServiceAction.phone:
-              launch("tel:$value");
-              break;
-
-            case ServiceAction.facebook:
-              launch(value);
-              break;
-
-            case ServiceAction.website:
-              launch("https://$value", forceWebView: true);
-              break;
-            default:
-          }
-        },
-        child: Text(value));
-  }
-
-  Widget detailContainerUI(
+  Widget _detailContainerUI(
       String value, Color? color, double? width, ServiceAction action) {
     return InkWell(
       onTap: () async {
         switch (action) {
           case ServiceAction.phone:
-            launch("tel:$value");
+            makePhoneCall(context, value);
             break;
 
           case ServiceAction.facebook:
@@ -257,19 +257,11 @@ class _GoldDetailState extends State<GoldDetail> {
             } else {
               fbProtocolUrl = 'fb://page/page_id';
             }
-            try {
-              bool launched = await launch(fbProtocolUrl, forceSafariVC: false);
-
-              if (!launched) {
-                await launch(value);
-              }
-            } catch (e) {
-              await launch(value);
-            }
+            launchInBrowser(context, fbProtocolUrl);
             break;
 
           case ServiceAction.website:
-            launch("https://$value", forceWebView: true);
+            launchInBrowser(context, value);
             break;
           default:
         }
@@ -277,16 +269,19 @@ class _GoldDetailState extends State<GoldDetail> {
       child: Container(
         padding: const EdgeInsets.all(7),
         width: width,
-        child: Linkable(
-          text: value,
+        child: Text(
+          value,
           style: TextStyle(
-              fontSize: 16, color: color, fontWeight: FontWeight.bold),
+            fontSize: 16,
+            color: color,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );
   }
 
-  Widget chartWidget() {
+  Widget chartWidget(Map<String, String> sixteenPriceList) {
     return ExpansionTile(
       title: const Padding(
         padding: EdgeInsets.only(left: 8.0),
@@ -296,12 +291,13 @@ class _GoldDetailState extends State<GoldDetail> {
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
       ),
+      initiallyExpanded: true,
       children: [
         SfCartesianChart(
           legend: Legend(isVisible: true, opacity: 0.7),
           plotAreaBorderWidth: 0,
           primaryXAxis: NumericAxis(
-              interval: 5,
+              // interval: 5,
               majorGridLines: const MajorGridLines(width: 0),
               edgeLabelPlacement: EdgeLabelPlacement.shift),
           primaryYAxis: NumericAxis(
@@ -313,7 +309,7 @@ class _GoldDetailState extends State<GoldDetail> {
             axisLine: const AxisLine(width: 0),
             majorTickLines: const MajorTickLines(size: 0),
           ),
-          series: _getSplieAreaSeries(),
+          series: _getSplieAreaSeries(sixteenPriceList),
         ),
       ],
     );
@@ -321,16 +317,18 @@ class _GoldDetailState extends State<GoldDetail> {
 
   /// Returns the list of chart series
   /// which need to render on the spline area chart.
-  List<ChartSeries<GoldPriceRate, double>> _getSplieAreaSeries() {
-    final List<GoldPriceRate> chartData = getChartData();
+  List<ChartSeries<GoldPriceRate, int>> _getSplieAreaSeries(
+      Map<String, String> sixteenPriceList) {
+    final List<GoldPriceRate> chartData = getChartData(sixteenPriceList);
 
-    return <ChartSeries<GoldPriceRate, double>>[
-      SplineSeries<GoldPriceRate, double>(
+    return <ChartSeries<GoldPriceRate, int>>[
+      SplineSeries<GoldPriceRate, int>(
         dataSource: chartData,
         splineType: SplineType.cardinal,
         cardinalSplineTension: 2,
         color: const Color.fromRGBO(197, 154, 81, 0.6),
-        xValueMapper: (GoldPriceRate sales, _) => sales.day,
+        xValueMapper: (GoldPriceRate sales, _) =>
+            sales.date.millisecondsSinceEpoch,
         yValueMapper: (GoldPriceRate sales, _) => sales.price,
         dataLabelSettings: const DataLabelSettings(isVisible: true),
         isVisibleInLegend: false,
@@ -338,15 +336,13 @@ class _GoldDetailState extends State<GoldDetail> {
     ];
   }
 
-  List<GoldPriceRate> getChartData() {
-    final List<GoldPriceRate> chartData = [
-      GoldPriceRate(0, 2500000),
-      GoldPriceRate(5, 1200000),
-      GoldPriceRate(10, 2400000),
-      GoldPriceRate(15, 2500000),
-      GoldPriceRate(20, 1800000),
-      GoldPriceRate(25, 3000000),
-    ];
+  List<GoldPriceRate> getChartData(Map<String, String> sixteenPriceList) {
+    final List<GoldPriceRate> chartData = [];
+    sixteenPriceList.forEach((key, value) {
+      chartData.add(GoldPriceRate(
+          DateFormat(dateFormatDayMonthYearHourMinSecond).parse(key),
+          double.parse(value)));
+    });
     return chartData;
   }
 
@@ -439,6 +435,10 @@ class _GoldDetailState extends State<GoldDetail> {
           );
         },
         () {
+          var psw = pswController.text;
+          pswController.text = "";
+          showSimpleSnackBar(
+              context, "Your password($psw) is invalid!", Colors.red);
           Navigator.pop(context);
         },
       );

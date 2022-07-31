@@ -1,20 +1,20 @@
 import 'dart:core';
 
 class Gold {
-  final String id;
-  final String name;
-  late final String imageUrl;
-  final String goldShopPassword;
-  final String sixteenPrice;
-  final String fifteenPrice;
-  final String phoneNo;
-  final String website;
-  final String facebook;
-  final String createdDate;
-  final String modifiedDate;
-  late final String color;
-  final List<String> sixteenPriceList;
-  final List<String> fifteenPriceList;
+  String id;
+  String name;
+  String imageUrl;
+  String goldShopPassword;
+  String sixteenPrice;
+  String fifteenPrice;
+  String phoneNo;
+  String website;
+  String facebook;
+  String createdDate;
+  String modifiedDate;
+  String color;
+  Map<String, String> sixteenPriceList;
+  Map<String, String> fifteenPriceList;
 
   Gold({
     required this.id,
@@ -55,4 +55,21 @@ class Gold {
       return false;
     }
   }
+
+  factory Gold.fromJson(Map<String, dynamic> json) => Gold(
+        id: json['id'] ?? '',
+        name: json['name'] ?? '',
+        imageUrl: json['imageUrl'] ?? '',
+        goldShopPassword: json['goldShopPassword'] ?? '',
+        sixteenPrice: json['sixteenPrice'] ?? '',
+        fifteenPrice: json['fifteenPrice'] ?? '',
+        createdDate: json['createdDate'] ?? '',
+        modifiedDate: json['modifiedDate'] ?? '',
+        phoneNo: json['phoneNo'] ?? '',
+        website: json['website'] ?? '',
+        facebook: json['facebook'] ?? '',
+        color: json['color'] ?? '',
+        sixteenPriceList: json['sixteenPriceList'] ?? <String, String>{},
+        fifteenPriceList: json['fifteenPriceList'] ?? <String, String>{},
+      );
 }

@@ -56,12 +56,9 @@ dependencies:
   
   intl: ^0.17.0
   
-  syncfusion_flutter_charts: ^19.3.48
+  syncfusion_flutter_charts: ^20.2.38
   url_launcher: ^6.0.12
-  linkable: ^3.0.1
-  flutter_speed_dial: ^5.0.0+1
   image_picker: ^0.8.4+11
-  flutter_material_color_picker: ^1.1.0+2
 
   # for using multi sliver list
   sliver_tools: ^0.2.5

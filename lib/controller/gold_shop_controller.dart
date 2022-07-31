@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -7,7 +8,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
 
 import '../common/common_widget.dart';
@@ -59,8 +59,8 @@ class GoldShopController with ChangeNotifier {
     createdDate: '',
     modifiedDate: '',
     color: '',
-    sixteenPriceList: [],
-    fifteenPriceList: [],
+    sixteenPriceList: <String, String>{},
+    fifteenPriceList: <String, String>{},
   );
 
   Gold _currentEditGold = Gold(
@@ -76,8 +76,8 @@ class GoldShopController with ChangeNotifier {
     createdDate: '',
     modifiedDate: '',
     color: '',
-    sixteenPriceList: [],
-    fifteenPriceList: [],
+    sixteenPriceList: <String, String>{},
+    fifteenPriceList: <String, String>{},
   );
   Gold get currentEditGold => _currentEditGold;
 
@@ -103,8 +103,8 @@ class GoldShopController with ChangeNotifier {
       createdDate: '',
       modifiedDate: '',
       color: '',
-      sixteenPriceList: [],
-      fifteenPriceList: [],
+      sixteenPriceList: <String, String>{},
+      fifteenPriceList: <String, String>{},
     );
 
     notifyListeners();
@@ -163,8 +163,9 @@ class GoldShopController with ChangeNotifier {
             .child(element.data()['imageUrl'].split('/').last);
         var url = await ref.getDownloadURL();
 
-        var createdDate = getDate(element.data()['created_date']);
-        var modifiedDate = getDate(element.data()['modified_date']);
+        var createdDate = getModifiedDateFormat(element.data()['created_date']);
+        var modifiedDate =
+            getModifiedDateFormat(element.data()['modified_date']);
         Gold goldObj = Gold(
           id: element.data()['id'],
           name: element.data()['name'],
@@ -179,9 +180,11 @@ class GoldShopController with ChangeNotifier {
           modifiedDate: modifiedDate,
           color: element.data()['color_hex'] ?? '',
           sixteenPriceList:
-              element.data()['sixteen_price_list'].cast<String>() ?? [],
+              element.data()['sixteen_price_list'].cast<String, String>() ??
+                  <String, String>{},
           fifteenPriceList:
-              element.data()['fifteen_price_list'].cast<String>() ?? [],
+              element.data()['fifteen_price_list'].cast<String, String>() ??
+                  <String, String>{},
         );
         var existingItem = _goldShopLst.firstWhere(
             (itemToCheck) => goldObj.isEqual(itemToCheck),
@@ -193,17 +196,6 @@ class GoldShopController with ChangeNotifier {
         notifyListeners();
       }
     });
-  }
-
-  getDate(value) {
-    DateTime? dateParse;
-    if (value != null) {
-      var date = value.toDate().toString();
-      dateParse = DateFormat('yyyy-MM-dd').parse(date);
-    }
-    var dateFormat =
-        value != null ? DateFormat('yyyy-MM-dd').format(dateParse!) : '';
-    return dateFormat;
   }
 
   setFilterGoldLst() {
@@ -252,31 +244,25 @@ class GoldShopController with ChangeNotifier {
         .collection('goldShop')
         .doc(id)
         .update(data)
-        .then((value) {
-      notifyListeners();
-      final snackBar =
-          showSnackBar('Updated Successful', Colors.green.shade200, () {});
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      currentEditGold = data as Gold;
+        .then((_) {
+      currentEditGold = Gold.fromJson(data);
+
+      showSimpleSnackBar(
+        context,
+        'Updated Successful',
+        Colors.green.shade200,
+      );
       getGoldShopData();
+      notifyListeners();
     }).catchError(
       (error) {
-        final snackBar =
-            showSnackBar('Update failed: $error', Colors.green.shade200, () {});
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        log('Update failed: $error');
+        showSimpleSnackBar(
+          context,
+          'Update failed: $error',
+          Colors.green.shade200,
+        );
       },
-    );
-  }
-
-  static showSnackBar(
-      String text, Color bgColor, VoidCallback dismissCallback) {
-    return SnackBar(
-      content: Text(text),
-      backgroundColor: (bgColor),
-      action: SnackBarAction(
-        label: 'dismiss',
-        onPressed: dismissCallback,
-      ),
     );
   }
 
@@ -306,5 +292,9 @@ class GoldShopController with ChangeNotifier {
         print(err);
       }
     }
+  }
+
+  void refreshData() {
+    notifyListeners();
   }
 }

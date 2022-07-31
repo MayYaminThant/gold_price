@@ -1,7 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
-import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:gold_price/common/common_widget.dart';
 import 'package:gold_price/controller/bottom_nav_controller.dart';
 import 'package:gold_price/controller/gold_shop_controller.dart';
@@ -17,10 +15,10 @@ class GoldEditorPage extends StatefulWidget {
   const GoldEditorPage({Key? key}) : super(key: key);
 
   @override
-  _GoldEditorPageState createState() => _GoldEditorPageState();
+  GoldEditorPageState createState() => GoldEditorPageState();
 }
 
-class _GoldEditorPageState extends State<GoldEditorPage> {
+class GoldEditorPageState extends State<GoldEditorPage> {
   final TextEditingController _shopNameTextController = TextEditingController();
   final TextEditingController _sixteenPrcTextController =
       TextEditingController();
@@ -52,24 +50,23 @@ class _GoldEditorPageState extends State<GoldEditorPage> {
   Widget build(BuildContext context) {
     CommonUtil.doInFuture(() {
       gold = context.read<GoldShopController>().currentEditGold;
-      _shopNameTextController.text = gold!.name;
-      _sixteenPrcTextController.text = gold!.sixteenPrice;
-      _fifteenPrcTextController.text = gold!.fifteenPrice;
-      _phoneNoTextController.text = gold!.phoneNo;
-      _facebookTextController.text = gold!.facebook;
-      _websiteTextController.text = gold!.website;
-      _createdDateTextController.text = gold!.createdDate;
-      _modifiedDateTextController.text = gold!.modifiedDate;
+      _shopNameTextController.text = gold?.name ?? '';
+      _sixteenPrcTextController.text = gold?.sixteenPrice ?? '0';
+      _fifteenPrcTextController.text = gold?.fifteenPrice ?? '0';
+      _phoneNoTextController.text = gold?.phoneNo ?? '';
+      _facebookTextController.text = gold?.facebook ?? '';
+      _websiteTextController.text = gold?.website ?? '';
+      _createdDateTextController.text = gold?.createdDate ?? '';
+      _modifiedDateTextController.text = gold?.modifiedDate ?? '';
     });
     return SafeArea(
         child: WillPopScope(
       onWillPop: () => Future.value(false),
       child: Consumer<GoldShopController>(
         builder: (_, controller, __) => Scaffold(
-          backgroundColor: controller.currentEditGold.color != ""
-              ? ColorExtension.fromHex(gold!.color)
-              : Colors.white,
-          // appBar: appBar(context),
+          // backgroundColor: controller.currentEditGold.color != ""
+          //     ? ColorExtension.fromHex(gold?.color ?? '#ffffff')
+          //     : Colors.white,
           body: _mainBody(),
         ),
       ),
@@ -114,8 +111,7 @@ class _GoldEditorPageState extends State<GoldEditorPage> {
       ),
       title: Consumer<GoldShopController>(
         builder: (_, controller, __) => Text(
-            (controller.currentEditGold.name.isNotEmpty ? 'Edit' : 'Add') +
-                ' Gold Shop'),
+            '${controller.currentEditGold.name.isNotEmpty ? 'Edit' : 'Add'} Gold Shop'),
       ),
       flexibleSpace: FlexibleSpaceBar(
         stretchModes: const [
@@ -156,48 +152,28 @@ class _GoldEditorPageState extends State<GoldEditorPage> {
         ),
       ),
       actions: [
-        Padding(
-          padding: const EdgeInsets.all(5),
-          child: SpeedDial(
-            backgroundColor: Colors.transparent,
-            overlayColor: Colors.transparent,
-            overlayOpacity: 0.2,
-            elevation: 0,
-            childrenButtonSize: const Size(50, 50),
-            child: const Icon(Icons.menu, size: 27),
-            direction: SpeedDialDirection.down,
-            children: <SpeedDialChild>[
-              SpeedDialChild(
-                  child: const Icon(
+        Consumer<GoldShopController>(
+          builder: (_, controller, __) => controller.isEditing
+              ? IconButton(
+                  onPressed: () {
+                    _showUpdatedWarningDialog();
+                  },
+                  icon: const Icon(
                     Icons.check,
-                    color: Colors.red,
+                    color: Colors.white,
                     size: 33,
-                  ),
-                  onTap: () {
-                    showWarningDialog();
-                  }),
-              SpeedDialChild(
-                  child: const Icon(
-                    Icons.close,
-                    color: Colors.black,
-                    size: 33,
-                  ),
-                  onTap: () {
-                    setState(() {});
-                  }),
-              SpeedDialChild(
-                child: const Icon(
-                  Icons.add_a_photo,
-                  color: Colors.blueGrey,
-                  size: 33,
-                ),
-                onTap: () {
-                  _showImagePickerDialog(context);
-                },
-              ),
-            ],
-          ),
-        )
+                  ))
+              : const SizedBox(),
+        ),
+        IconButton(
+            onPressed: () {
+              _showImagePickerDialog(context);
+            },
+            icon: const Icon(
+              Icons.add_a_photo,
+              color: Colors.white,
+              size: 33,
+            )),
       ],
     );
   }
@@ -215,24 +191,19 @@ class _GoldEditorPageState extends State<GoldEditorPage> {
           _shopNameTextController,
           false,
         )),
-        // CustomScrollView(
-        //   scrollDirection: Axis.horizontal,
-        //   slivers: [_getColorSliverList(context)],
-        // ),
         SliverToBoxAdapter(
           child: Consumer<GoldShopController>(
-            builder: (_, goldCon, __) => MaterialColorPicker(
-              iconSelected: Icons.api,
-              circleSize: 39,
-              selectedColor: gold != null && gold!.color != ""
-                  ? ColorExtension.fromHex(gold!.color)
-                  : Colors.white,
-              onColorChange: (changedColor) {
-                if (changedColor != null) {
-                  goldCon.currentEditGold.color =
-                      changedColor.value.toRadixString(16);
-                }
-              },
+            builder: (_, goldCon, __) => Container(
+              height: 70,
+              width: double.infinity,
+              padding: const EdgeInsets.all(5),
+              child: ListView.builder(
+                shrinkWrap: true,
+                scrollDirection: Axis.horizontal,
+                itemCount: colors.length,
+                itemBuilder: (buildContext, position) =>
+                    colorBuilderContainer(goldCon, position),
+              ),
             ),
           ),
         ),
@@ -363,22 +334,37 @@ class _GoldEditorPageState extends State<GoldEditorPage> {
     );
   }
 
-  showWarningDialog() {
-    if (gold!.sixteenPriceList.isNotEmpty &&
+  _showUpdatedWarningDialog() {
+    if (gold != null &&
+        gold!.sixteenPriceList.isNotEmpty &&
         double.parse(_sixteenPrcTextController.text) !=
-            double.parse(gold!.sixteenPriceList.last)) {
+            double.parse(gold!.sixteenPriceList.values.last)) {
       if (gold!.sixteenPriceList.length == 10) {
-        gold!.sixteenPriceList.removeAt(0);
+        gold!.sixteenPriceList.remove(gold!.sixteenPriceList.entries.first.key);
       }
-      gold!.sixteenPriceList.add(_sixteenPrcTextController.text);
+      gold!.sixteenPriceList.putIfAbsent(
+          getDateWithCustomFormat(
+              DateTime.now(), dateFormatDayMonthYearHourMinSecond),
+          () => _sixteenPrcTextController.text);
     }
-    if (gold!.fifteenPriceList.isNotEmpty &&
+    if (gold != null &&
+        gold!.fifteenPriceList.isNotEmpty &&
         double.parse(_fifteenPrcTextController.text) !=
-            double.parse(gold!.fifteenPriceList.last)) {
-      if (gold!.sixteenPriceList.length == 10) {
-        gold!.fifteenPriceList.removeAt(0);
+            double.parse(gold!.fifteenPriceList.values.last)) {
+      if (gold!.fifteenPriceList.length == 10) {
+        gold!.fifteenPriceList.remove(gold!.fifteenPriceList.entries.first.key);
       }
-      gold!.fifteenPriceList.add(_fifteenPrcTextController.text);
+      gold!.fifteenPriceList.putIfAbsent(
+          getDateWithCustomFormat(
+              DateTime.now(), dateFormatDayMonthYearHourMinSecond),
+          () => _fifteenPrcTextController.text);
+    }
+    if (gold == null || gold!.id.isEmpty) {
+      showSimpleSnackBar(
+        context,
+        'Gold id should not be empty!',
+        Colors.green.shade200,
+      );
     }
     return warningDialog(
       context,
@@ -399,8 +385,9 @@ class _GoldEditorPageState extends State<GoldEditorPage> {
                 _createdDateTextController.text)), //millisecondsSinceEpoch
             'modified_date': Timestamp.fromDate(
                 DateTime.parse(_modifiedDateTextController.text)),
-            'sixteen_price_list': gold!.sixteenPriceList,
-            'fifteen_price_list': gold!.fifteenPriceList,
+            'sixteen_price_list': gold?.sixteenPriceList ?? <String, String>{},
+            'fifteen_price_list': gold?.fifteenPriceList ?? <String, String>{},
+            'color_hex': gold?.color ?? '',
           },
         );
         Navigator.of(context).pop();
@@ -472,17 +459,6 @@ class _GoldEditorPageState extends State<GoldEditorPage> {
     controller.uploadPic(context, source, controller);
   }
 
-  // SliverList _getColorSliverList(BuildContext context) {
-  //   return SliverList(
-  //     delegate: SliverChildBuilderDelegate(
-  //       (BuildContext context, int index) {
-  //         return buildRow(colors[index]);
-  //       },
-  //       childCount: colors.length,
-  //     ),
-  //   );
-  // }
-
   buildRow(String color) {
     return Container(
       decoration: BoxDecoration(
@@ -491,4 +467,28 @@ class _GoldEditorPageState extends State<GoldEditorPage> {
       ),
     );
   }
+}
+
+Widget colorBuilderContainer(GoldShopController controller, int index) {
+  return InkWell(
+    onTap: () {
+      if (colors[index].isNotEmpty) {
+        controller.currentEditGold.color = colors[index];
+        controller.isEditing = true;
+        controller.refreshData();
+      }
+    },
+    child: Container(
+        height: 40,
+        width: 55,
+        margin: const EdgeInsets.all(5),
+        decoration: BoxDecoration(
+            color: ColorExtension.fromHex(colors[index]),
+            // border: Border.all(color: Colors.white),
+            borderRadius: BorderRadius.circular(50)),
+        child: controller.currentEditGold.color != "" &&
+                controller.currentEditGold.color == colors[index]
+            ? const Icon(Icons.check)
+            : const SizedBox()),
+  );
 }

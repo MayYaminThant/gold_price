@@ -10,10 +10,10 @@ class CalculatePage extends StatefulWidget {
   const CalculatePage({Key? key}) : super(key: key);
 
   @override
-  _CalculatePageState createState() => _CalculatePageState();
+  CalculatePageState createState() => CalculatePageState();
 }
 
-class _CalculatePageState extends State<CalculatePage> {
+class CalculatePageState extends State<CalculatePage> {
   final TextEditingController _mainGoldPriceTextController =
       TextEditingController();
   final TextEditingController _calculatedGoldPriceTextController =
@@ -35,14 +35,14 @@ class _CalculatePageState extends State<CalculatePage> {
           .toStringAsFixed(0);
       CalculatingGold calculatingGold =
           context.read<CalulatePageController>().calculatingGold;
-      _kyatTextController.text = calculatingGold.kyat! > 0
-          ? calculatingGold.kyat!.toStringAsFixed(0)
+      _kyatTextController.text = (calculatingGold.kyat ?? 0) > 0
+          ? (calculatingGold.kyat ?? 0).toStringAsFixed(0)
           : "0";
-      _paeTextController.text = calculatingGold.pae! > 0
-          ? calculatingGold.pae!.toStringAsFixed(0)
+      _paeTextController.text = (calculatingGold.pae ?? 0) > 0
+          ? (calculatingGold.kyat ?? 0).toStringAsFixed(0)
           : "0";
-      _ywayTextController.text = calculatingGold.yway! > 0
-          ? calculatingGold.yway!.toStringAsFixed(0)
+      _ywayTextController.text = (calculatingGold.yway ?? 0) > 0
+          ? (calculatingGold.kyat ?? 0).toStringAsFixed(0)
           : "0";
     });
     return Scaffold(
@@ -233,15 +233,15 @@ class _CalculatePageState extends State<CalculatePage> {
           builder: (_, controller, __) {
             if (controller.calculatingGold.kyat != null) {
               _kyatTextController.text =
-                  controller.calculatingGold.kyat!.toStringAsFixed(0);
+                  (controller.calculatingGold.kyat ?? 0).toStringAsFixed(0);
             }
             if (controller.calculatingGold.pae != null) {
               _paeTextController.text =
-                  controller.calculatingGold.pae!.toStringAsFixed(0);
+                  (controller.calculatingGold.pae ?? 0).toStringAsFixed(0);
             }
             if (controller.calculatingGold.yway != null) {
               _ywayTextController.text =
-                  controller.calculatingGold.yway!.toStringAsFixed(0);
+                  (controller.calculatingGold.yway ?? 0).toStringAsFixed(0);
             }
             return Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -343,11 +343,11 @@ class _CalculatePageState extends State<CalculatePage> {
 
   _calculatingAmount(CalulatePageController controller, double result) {
     double kyatVal =
-        controller.calculatingGold.kyat! * controller.todayGoldPrice;
-    double paeVal =
-        (controller.todayGoldPrice / 16) * controller.calculatingGold.pae!;
-    double ywayVal =
-        (controller.todayGoldPrice / 16 / 8) * controller.calculatingGold.yway!;
+        (controller.calculatingGold.kyat ?? 0) * controller.todayGoldPrice;
+    double paeVal = (controller.todayGoldPrice / 16) *
+        (controller.calculatingGold.pae ?? 0);
+    double ywayVal = (controller.todayGoldPrice / 16 / 8) *
+        (controller.calculatingGold.yway ?? 0);
 
     controller.calculatedAmount = kyatVal + paeVal + ywayVal;
   }
@@ -423,7 +423,7 @@ class _CalculatePageState extends State<CalculatePage> {
                 onFieldSubmitted: (value) => stringCallback(value),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Enter ' + title;
+                    return 'Enter $title';
                   }
                   return null;
                 }),

@@ -98,7 +98,7 @@ packages:
       name: ffi
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0"
+    version: "2.0.1"
   file:
     dependency: transitive
     description:
@@ -112,42 +112,42 @@ packages:
       name: firebase_core
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.18.0"
+    version: "1.19.1"
   firebase_core_platform_interface:
     dependency: transitive
     description:
       name: firebase_core_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.4.1"
+    version: "4.4.3"
   firebase_core_web:
     dependency: transitive
     description:
       name: firebase_core_web
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.6.5"
+    version: "1.6.6"
   firebase_storage:
     dependency: "direct main"
     description:
       name: firebase_storage
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "10.2.18"
+    version: "10.3.1"
   firebase_storage_platform_interface:
     dependency: transitive
     description:
       name: firebase_storage_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.1.8"
+    version: "4.1.10"
   firebase_storage_web:
     dependency: transitive
     description:
       name: firebase_storage_web
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.2.17"
+    version: "3.2.19"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -160,13 +160,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.1"
-  flutter_material_color_picker:
-    dependency: "direct main"
-    description:
-      name: flutter_material_color_picker
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.1.0+2"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:
@@ -174,13 +167,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.6"
-  flutter_speed_dial:
-    dependency: "direct main"
-    description:
-      name: flutter_speed_dial
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "5.1.0"
   flutter_test:
     dependency: "direct dev"
     description: flutter
@@ -260,7 +246,7 @@ packages:
       name: image_picker_ios
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.8.5+5"
+    version: "0.8.5+6"
   image_picker_platform_interface:
     dependency: transitive
     description:
@@ -282,13 +268,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.6.4"
-  linkable:
-    dependency: "direct main"
-    description:
-      name: linkable
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "3.0.1"
   lints:
     dependency: transitive
     description:
@@ -344,7 +323,7 @@ packages:
       name: path_provider_android
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.15"
+    version: "2.0.16"
   path_provider_ios:
     dependency: transitive
     description:
@@ -461,14 +440,14 @@ packages:
       name: syncfusion_flutter_charts
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "19.4.56"
+    version: "20.2.38"
   syncfusion_flutter_core:
     dependency: transitive
     description:
       name: syncfusion_flutter_core
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "19.4.56"
+    version: "20.2.38"
   term_glyph:
     dependency: transitive
     description:
@@ -496,7 +475,7 @@ packages:
       name: url_launcher
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.1.3"
+    version: "6.1.4"
   url_launcher_android:
     dependency: transitive
     description:

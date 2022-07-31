@@ -1,5 +1,5 @@
 class GoldPriceRate {
-  GoldPriceRate(this.day, this.price);
-  final double day;
+  GoldPriceRate(this.date, this.price);
+  final DateTime date;
   final double price;
 }
