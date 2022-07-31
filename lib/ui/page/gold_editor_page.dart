@@ -5,6 +5,7 @@ import 'package:gold_price/controller/bottom_nav_controller.dart';
 import 'package:gold_price/controller/gold_shop_controller.dart';
 import 'package:gold_price/model/gold.dart';
 import 'package:gold_price/util/common_util.dart';
+import 'package:gold_price/util/image_util.dart';
 import 'package:gold_price/util/screen_util.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -83,6 +84,7 @@ class GoldEditorPageState extends State<GoldEditorPage> {
       leading: Consumer<GoldShopController>(
         builder: (_, controller, __) => IconButton(
           onPressed: () {
+            controller.pickedImageFile = null;
             if (!controller.isEditing) {
               if (controller.currentEditGold.name.isNotEmpty) {
                 controller.currentEditGold = controller.newGold;
@@ -135,19 +137,17 @@ class GoldEditorPageState extends State<GoldEditorPage> {
               // Stack(
               //   children: [
               Consumer<GoldShopController>(
-            builder: (_, controller, __) => Image.network(
-              controller.currentEditGold.imageUrl,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => SizedBox(
-                width: ScreenSizeUtil.getScreenWidth(context),
-                child: Image.asset(
-                  'assets/images/4.jpg',
-                  color: Colors.grey.withOpacity(0.5),
-                  colorBlendMode: BlendMode.srcOver,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
+            builder: (_, controller, __) => controller.pickedImageFile != null
+                ? Image.file(
+                    controller.pickedImageFile!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => getErrorImage(context),
+                  )
+                : Image.network(
+                    controller.currentEditGold.imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => getErrorImage(context),
+                  ),
           ),
         ),
       ),
@@ -359,6 +359,7 @@ class GoldEditorPageState extends State<GoldEditorPage> {
               DateTime.now(), dateFormatDayMonthYearHourMinSecond),
           () => _fifteenPrcTextController.text);
     }
+
     if (gold == null || gold!.id.isEmpty) {
       showSimpleSnackBar(
         context,
@@ -370,9 +371,14 @@ class GoldEditorPageState extends State<GoldEditorPage> {
       context,
       'Are you sure you want to change data!',
       'Update',
-      () {
-        GoldShopController(1).updateGoldData(
-          context,
+      () async {
+        Navigator.of(context).pop(); // to close confirmation updating dialog
+        GoldShopController goldShopController =
+            context.read<GoldShopController>();
+        if (goldShopController.pickedImageFile != null) {
+          await goldShopController.uploadPic(context);
+        }
+        goldShopController.updateGoldData(
           gold!.id,
           {
             'name': _shopNameTextController.text,
@@ -388,9 +394,23 @@ class GoldEditorPageState extends State<GoldEditorPage> {
             'sixteen_price_list': gold?.sixteenPriceList ?? <String, String>{},
             'fifteen_price_list': gold?.fifteenPriceList ?? <String, String>{},
             'color_hex': gold?.color ?? '',
+            'imageUrl': gold?.imageUrl ?? '',
+          },
+          successCallback: () {
+            showSimpleSnackBar(
+              context,
+              'Updated Successful',
+              Colors.green.shade200,
+            );
+          },
+          failureCallback: (dynamic error) {
+            showSimpleSnackBar(
+              context,
+              'Update failed: $error',
+              Colors.green.shade200,
+            );
           },
         );
-        Navigator.of(context).pop();
       },
       () {
         Navigator.of(context).pop();
@@ -456,7 +476,8 @@ class GoldEditorPageState extends State<GoldEditorPage> {
     ImageSource source,
     GoldShopController controller,
   ) async {
-    controller.uploadPic(context, source, controller);
+    controller.pickImage(context, source, controller);
+    Navigator.pop(context);
   }
 
   buildRow(String color) {

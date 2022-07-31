@@ -12,6 +12,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
+import '../../util/image_util.dart';
 import 'main_page.dart';
 
 class GoldDetail extends StatefulWidget {
@@ -123,6 +124,7 @@ class GoldDetailState extends State<GoldDetail> {
           child: Image.network(
             widget.gold.imageUrl,
             fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => getErrorImage(context),
           ),
         ),
       ),

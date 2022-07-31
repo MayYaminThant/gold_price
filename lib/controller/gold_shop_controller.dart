@@ -36,6 +36,9 @@ class GoldShopController with ChangeNotifier {
   bool _isEditing = true;
   bool get isEditing => _isEditing;
 
+  File? _pickedImageFile;
+  File? get pickedImageFile => _pickedImageFile;
+
   // ignore: prefer_final_fields
   Image _goldImage = Image.asset('assets/images/4.jpg');
   Image get goldImage => _goldImage;
@@ -145,6 +148,12 @@ class GoldShopController with ChangeNotifier {
     notifyListeners();
   }
 
+  set pickedImageFile(File? pickedImageFile) {
+    if (pickedImageFile == _pickedImageFile) return;
+    _pickedImageFile = pickedImageFile;
+    notifyListeners();
+  }
+
   Future<void> getGoldShopData() async {
     _goldShopLst = [];
     _filterGoldShopLst = [];
@@ -161,7 +170,12 @@ class GoldShopController with ChangeNotifier {
         final ref = FirebaseStorage.instance
             .ref()
             .child(element.data()['imageUrl'].split('/').last);
-        var url = await ref.getDownloadURL();
+        String url;
+        try {
+          url = await ref.getDownloadURL();
+        } catch (e) {
+          url = '';
+        }
 
         var createdDate = getModifiedDateFormat(element.data()['created_date']);
         var modifiedDate =
@@ -234,11 +248,9 @@ class GoldShopController with ChangeNotifier {
     });
   }
 
-  updateGoldData(
-    BuildContext context,
-    String id,
-    Map<String, dynamic> data,
-  ) {
+  updateGoldData(String id, Map<String, dynamic> data,
+      {VoidCallback? successCallback,
+      Function(dynamic error)? failureCallback}) {
     FocusManager.instance.primaryFocus?.unfocus();
     FirebaseFirestore.instance
         .collection('goldShop')
@@ -246,42 +258,60 @@ class GoldShopController with ChangeNotifier {
         .update(data)
         .then((_) {
       currentEditGold = Gold.fromJson(data);
-
-      showSimpleSnackBar(
-        context,
-        'Updated Successful',
-        Colors.green.shade200,
-      );
+      successCallback?.call();
       getGoldShopData();
       notifyListeners();
     }).catchError(
       (error) {
         log('Update failed: $error');
-        showSimpleSnackBar(
-          context,
-          'Update failed: $error',
-          Colors.green.shade200,
-        );
+        failureCallback?.call(error);
       },
     );
   }
 
-  Future uploadPic(
+  void pickImage(
     BuildContext context,
     ImageSource source,
     GoldShopController controller,
   ) async {
-    FirebaseStorage storage = FirebaseStorage.instance;
-
     try {
       XFile? pickedFile = await ImagePicker().pickImage(
         source: source,
       );
-      final String fileName = path.basename(pickedFile!.path);
-      File imageFile = File(pickedFile.path);
+      if (pickedFile != null) {
+        File imageFile = File(pickedFile.path);
+        pickedImageFile = imageFile;
+        isEditing = true;
+      }
+    } catch (err) {
+      if (kDebugMode) {
+        log(err.toString());
+      }
+    }
+  }
+
+  Future uploadPic(BuildContext context) async {
+    FirebaseStorage storage = FirebaseStorage.instance;
+    if (pickedImageFile == null) {
+      showSimpleSnackBar(context, "Your picked image is invalid!", Colors.red);
+      return;
+    }
+
+    try {
+      final String fileName = path.basename(pickedImageFile!.path);
+      File imageFile = File(pickedImageFile!.path);
       try {
-        await storage.ref(fileName).putFile(imageFile).then((snapshot) =>
-            currentEditGold.imageUrl = snapshot.ref.getDownloadURL() as String);
+        await storage.ref(fileName).putFile(imageFile).then((snapshot) async {
+          var medaData = await snapshot.ref.getMetadata();
+          var oldImageUrl = currentEditGold.imageUrl;
+          currentEditGold.imageUrl =
+              'gs://${medaData.bucket ?? ''}/${medaData.fullPath}';
+
+          if (oldImageUrl.isNotEmpty) {
+            await storage.refFromURL(oldImageUrl).delete();
+          }
+          notifyListeners();
+        });
       } on FirebaseException catch (e) {
         if (kDebugMode) {
           print(e);
