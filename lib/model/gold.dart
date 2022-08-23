@@ -72,4 +72,25 @@ class Gold {
         sixteenPriceList: json['sixteenPriceList'] ?? <String, String>{},
         fifteenPriceList: json['fifteenPriceList'] ?? <String, String>{},
       );
+
+  factory Gold.fromFirebase(Map<String, dynamic> json) => Gold(
+        id: json['id'] ?? '',
+        name: json['name'] ?? '',
+        imageUrl: json['imageUrl'] ?? '',
+        goldShopPassword: json['gold_shop_password'] ?? '',
+        sixteenPrice: json['sixteen_price'] ?? '',
+        fifteenPrice: json['fifteen_price'] ?? '',
+        createdDate: json['createdDate'] ?? '',
+        modifiedDate: json['modifiedDate'] ?? '',
+        phoneNo: json['phoneNo'] ?? '',
+        website: json['website'] ?? '',
+        facebook: json['facebook'] ?? '',
+        color: json['color_hex'] ?? '',
+        sixteenPriceList: json['sixteen_price_list'] != null
+            ? json['sixteen_price_list'].cast<String, String>()
+            : <String, String>{},
+        fifteenPriceList: json['fifteen_price_list'] != null
+            ? json['fifteen_price_list'].cast<String, String>()
+            : <String, String>{},
+      );
 }

@@ -32,6 +32,7 @@ class GoldEditorPageState extends State<GoldEditorPage> {
       TextEditingController();
   final TextEditingController _modifiedDateTextController =
       TextEditingController();
+  final TextEditingController _pswTextController = TextEditingController();
   Gold? gold;
 
   @override
@@ -59,6 +60,7 @@ class GoldEditorPageState extends State<GoldEditorPage> {
       _websiteTextController.text = gold?.website ?? '';
       _createdDateTextController.text = gold?.createdDate ?? '';
       _modifiedDateTextController.text = gold?.modifiedDate ?? '';
+      _pswTextController.text = gold?.goldShopPassword ?? '';
     });
     return SafeArea(
         child: WillPopScope(
@@ -68,6 +70,7 @@ class GoldEditorPageState extends State<GoldEditorPage> {
           // backgroundColor: controller.currentEditGold.color != ""
           //     ? ColorExtension.fromHex(gold?.color ?? '#ffffff')
           //     : Colors.white,
+
           body: _mainBody(),
         ),
       ),
@@ -87,8 +90,9 @@ class GoldEditorPageState extends State<GoldEditorPage> {
             controller.pickedImageFile = null;
             if (!controller.isEditing) {
               if (controller.currentEditGold.name.isNotEmpty) {
+                controller.goldForDetail = controller.currentEditGold;
                 controller.currentEditGold = controller.newGold;
-                Navigator.pop(context, "Backbutton data");
+                Navigator.pop(context);
               } else {
                 controller.currentEditGold = controller.newGold;
                 context.read<BottomNavController>().selectedIndex = 0;
@@ -133,10 +137,7 @@ class GoldEditorPageState extends State<GoldEditorPage> {
               ],
             ),
           ),
-          child:
-              // Stack(
-              //   children: [
-              Consumer<GoldShopController>(
+          child: Consumer<GoldShopController>(
             builder: (_, controller, __) => controller.pickedImageFile != null
                 ? Image.file(
                     controller.pickedImageFile!,
@@ -156,7 +157,7 @@ class GoldEditorPageState extends State<GoldEditorPage> {
           builder: (_, controller, __) => controller.isEditing
               ? IconButton(
                   onPressed: () {
-                    _showUpdatedWarningDialog();
+                    _confirmationInsertOrUpdateDataWarningDialog();
                   },
                   icon: const Icon(
                     Icons.check,
@@ -192,6 +193,11 @@ class GoldEditorPageState extends State<GoldEditorPage> {
           false,
         )),
         SliverToBoxAdapter(
+            child: getPasswordTextField(
+          'Password',
+          _pswTextController,
+        )),
+        SliverToBoxAdapter(
           child: Consumer<GoldShopController>(
             builder: (_, goldCon, __) => Container(
               height: 70,
@@ -212,18 +218,21 @@ class GoldEditorPageState extends State<GoldEditorPage> {
           'Sixteen Gold Price',
           _sixteenPrcTextController,
           false,
+          inputType: TextInputType.number,
         )),
         SliverToBoxAdapter(
             child: textFormField(
           'Fifteen Gold Price',
           _fifteenPrcTextController,
           false,
+          inputType: TextInputType.number,
         )),
         SliverToBoxAdapter(
             child: textFormField(
           'Phone No.',
           _phoneNoTextController,
           false,
+          inputType: TextInputType.phone,
         )),
         SliverToBoxAdapter(
             child: textFormField(
@@ -254,10 +263,8 @@ class GoldEditorPageState extends State<GoldEditorPage> {
   }
 
   Widget textFormField(
-    String title,
-    TextEditingController controller,
-    bool isDate,
-  ) {
+      String title, TextEditingController controller, bool isDate,
+      {TextInputType inputType = TextInputType.text}) {
     return Container(
       width: ScreenSizeUtil.getScreenWidth(context) - 16,
       // height: 60,
@@ -265,7 +272,7 @@ class GoldEditorPageState extends State<GoldEditorPage> {
       margin: const EdgeInsets.all(8),
       child: isDate
           ? getDateTextField(title, controller)
-          : getTextField(title, controller),
+          : getTextField(title, controller, inputType),
     );
   }
 
@@ -302,30 +309,16 @@ class GoldEditorPageState extends State<GoldEditorPage> {
   getTextField(
     String title,
     TextEditingController controller,
+    TextInputType inputType,
   ) {
     return Consumer<GoldShopController>(
       builder: (_, goldcontroller, __) => TextFormField(
         controller: controller,
+        keyboardType: inputType,
         decoration: InputDecoration(
           labelText: title,
-          border: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(
-              Radius.circular(8),
-            ),
-            borderSide: BorderSide(
-              color: Colors.grey,
-              width: 1,
-            ),
-          ),
-          focusedBorder: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(
-              Radius.circular(8),
-            ),
-            borderSide: BorderSide(
-              color: Color.fromARGB(255, 0, 101, 234),
-              width: 2.5,
-            ),
-          ),
+          border: _borderTextFormField(),
+          focusedBorder: _focusedBorderTextFormField(),
         ),
         onChanged: (value) {
           goldcontroller.isEditing = true;
@@ -334,11 +327,58 @@ class GoldEditorPageState extends State<GoldEditorPage> {
     );
   }
 
-  _showUpdatedWarningDialog() {
+  getPasswordTextField(String title, TextEditingController controller) {
+    return Container(
+      width: ScreenSizeUtil.getScreenWidth(context) - 16,
+      padding: const EdgeInsets.all(2),
+      margin: const EdgeInsets.all(8),
+      child: Consumer<GoldShopController>(
+        builder: (_, goldcontroller, __) => TextFormField(
+          controller: controller,
+          maxLength: 8,
+          keyboardType: TextInputType.visiblePassword,
+          decoration: InputDecoration(
+            labelText: title,
+            border: _borderTextFormField(),
+            focusedBorder: _focusedBorderTextFormField(),
+          ),
+          onChanged: (value) {
+            goldcontroller.isEditing = true;
+          },
+        ),
+      ),
+    );
+  }
+
+  OutlineInputBorder _focusedBorderTextFormField() {
+    return const OutlineInputBorder(
+      borderRadius: BorderRadius.all(
+        Radius.circular(8),
+      ),
+      borderSide: BorderSide(
+        color: Color.fromARGB(255, 0, 101, 234),
+        width: 2.5,
+      ),
+    );
+  }
+
+  OutlineInputBorder _borderTextFormField() {
+    return const OutlineInputBorder(
+      borderRadius: BorderRadius.all(
+        Radius.circular(8),
+      ),
+      borderSide: BorderSide(
+        color: Colors.grey,
+        width: 1,
+      ),
+    );
+  }
+
+  _confirmationInsertOrUpdateDataWarningDialog() {
     if (gold != null &&
-        gold!.sixteenPriceList.isNotEmpty &&
-        double.parse(_sixteenPrcTextController.text) !=
-            double.parse(gold!.sixteenPriceList.values.last)) {
+        (gold!.sixteenPriceList.isEmpty ||
+            double.parse(_sixteenPrcTextController.text) !=
+                double.parse(gold!.sixteenPriceList.values.last))) {
       if (gold!.sixteenPriceList.length == 10) {
         gold!.sixteenPriceList.remove(gold!.sixteenPriceList.entries.first.key);
       }
@@ -348,9 +388,9 @@ class GoldEditorPageState extends State<GoldEditorPage> {
           () => _sixteenPrcTextController.text);
     }
     if (gold != null &&
-        gold!.fifteenPriceList.isNotEmpty &&
-        double.parse(_fifteenPrcTextController.text) !=
-            double.parse(gold!.fifteenPriceList.values.last)) {
+        (gold!.fifteenPriceList.isEmpty ||
+            double.parse(_fifteenPrcTextController.text) !=
+                double.parse(gold!.fifteenPriceList.values.last))) {
       if (gold!.fifteenPriceList.length == 10) {
         gold!.fifteenPriceList.remove(gold!.fifteenPriceList.entries.first.key);
       }
@@ -359,27 +399,30 @@ class GoldEditorPageState extends State<GoldEditorPage> {
               DateTime.now(), dateFormatDayMonthYearHourMinSecond),
           () => _fifteenPrcTextController.text);
     }
-
-    if (gold == null || gold!.id.isEmpty) {
-      showSimpleSnackBar(
-        context,
-        'Gold id should not be empty!',
-        Colors.green.shade200,
-      );
+    bool isInsertedData = false;
+    if (gold == null || gold!.id.isEmpty || gold!.id == '0') {
+      isInsertedData = true;
     }
+    if (_pswTextController.text.isEmpty) {
+      showSimpleSnackBar(context, "Password should not be empty!", Colors.red);
+      return;
+    }
+
     return warningDialog(
       context,
-      'Are you sure you want to change data!',
-      'Update',
+      'Are you sure you want to ${isInsertedData ? 'add' : 'change'} data!',
+      isInsertedData ? 'Add' : 'Update',
       () async {
         Navigator.of(context).pop(); // to close confirmation updating dialog
+
         GoldShopController goldShopController =
             context.read<GoldShopController>();
+        String imageDownloadUrl = "";
         if (goldShopController.pickedImageFile != null) {
-          await goldShopController.uploadPic(context);
+          imageDownloadUrl = await goldShopController.uploadPic(context);
         }
-        goldShopController.updateGoldData(
-          gold!.id,
+        goldShopController.fetchInsertOrUpdateGold(
+          gold,
           {
             'name': _shopNameTextController.text,
             'sixteen_price': _sixteenPrcTextController.text,
@@ -388,25 +431,35 @@ class GoldEditorPageState extends State<GoldEditorPage> {
             'website': _websiteTextController.text,
             'facebook': _facebookTextController.text,
             'created_date': Timestamp.fromDate(DateTime.parse(
-                _createdDateTextController.text)), //millisecondsSinceEpoch
-            'modified_date': Timestamp.fromDate(
-                DateTime.parse(_modifiedDateTextController.text)),
+                _createdDateTextController.text.isEmpty
+                    ? DateTime.now().toString()
+                    : _createdDateTextController
+                        .text)), //millisecondsSinceEpoch
+            'modified_date': Timestamp.fromDate(DateTime.parse(
+                _modifiedDateTextController.text.isEmpty
+                    ? DateTime.now().toString()
+                    : _modifiedDateTextController.text)),
             'sixteen_price_list': gold?.sixteenPriceList ?? <String, String>{},
             'fifteen_price_list': gold?.fifteenPriceList ?? <String, String>{},
-            'color_hex': gold?.color ?? '',
+            'color_hex':
+                (gold?.color.isNotEmpty == true ? gold?.color : colors[0]),
             'imageUrl': gold?.imageUrl ?? '',
+            'gold_shop_password': _pswTextController.text,
           },
+          goldShopController.pickedImageFile != null,
+          imageDownloadUrl,
           successCallback: () {
             showSimpleSnackBar(
               context,
-              'Updated Successful',
+              '${isInsertedData ? 'Insert' : 'Updated'} Successful',
               Colors.green.shade200,
             );
+            goldShopController.isEditing = false;
           },
           failureCallback: (dynamic error) {
             showSimpleSnackBar(
               context,
-              'Update failed: $error',
+              '${isInsertedData ? 'Insert' : 'Updated'} Failed: $error',
               Colors.green.shade200,
             );
           },
@@ -506,9 +559,10 @@ Widget colorBuilderContainer(GoldShopController controller, int index) {
         decoration: BoxDecoration(
             color: ColorExtension.fromHex(colors[index]),
             // border: Border.all(color: Colors.white),
-            borderRadius: BorderRadius.circular(50)),
-        child: controller.currentEditGold.color != "" &&
-                controller.currentEditGold.color == colors[index]
+            borderRadius: BorderRadius.circular(40)),
+        child: ((controller.currentEditGold.color.isEmpty && index == 0) ||
+                (controller.currentEditGold.color != "" &&
+                    controller.currentEditGold.color == colors[index]))
             ? const Icon(Icons.check)
             : const SizedBox()),
   );

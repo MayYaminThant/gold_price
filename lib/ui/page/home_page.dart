@@ -51,9 +51,7 @@ class HomePageState extends State<HomePage> {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: gridChild(
-                              controller.filterGoldShopLst.elementAt(index),
-                            ),
+                            child: gridChild(controller, index),
                           );
                         }, childCount: controller.filterGoldShopLst.length),
                       )),
@@ -97,15 +95,17 @@ class HomePageState extends State<HomePage> {
     );
   }
 
-  Widget gridChild(Gold gold) {
+  Widget gridChild(GoldShopController controller, int index) {
+    Gold gold = controller.filterGoldShopLst.elementAt(index);
     Color colorPr = ColorExtension.fromHex(gold.color);
     return InkWell(
       onTap: () {
+        controller.goldForDetail = gold;
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) {
-              return GoldDetail(gold: gold);
+              return const GoldDetail();
             },
           ),
         );

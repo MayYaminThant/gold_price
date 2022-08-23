@@ -92,6 +92,32 @@ class GoldShopController with ChangeNotifier {
     notifyListeners();
   }
 
+  Gold _goldForDetail = Gold(
+    id: '',
+    name: '',
+    imageUrl: '',
+    goldShopPassword: '',
+    sixteenPrice: '',
+    fifteenPrice: '',
+    phoneNo: '',
+    website: '',
+    facebook: '',
+    createdDate: '',
+    modifiedDate: '',
+    color: '',
+    sixteenPriceList: <String, String>{},
+    fifteenPriceList: <String, String>{},
+  );
+  Gold get goldForDetail => _goldForDetail;
+
+  set goldForDetail(Gold goldForDetail) {
+    if (_goldForDetail == goldForDetail) return;
+
+    _goldForDetail = goldForDetail;
+
+    notifyListeners();
+  }
+
   resetCurrentEditGold() {
     _currentEditGold = Gold(
       id: '',
@@ -193,12 +219,12 @@ class GoldShopController with ChangeNotifier {
           createdDate: createdDate,
           modifiedDate: modifiedDate,
           color: element.data()['color_hex'] ?? '',
-          sixteenPriceList:
-              element.data()['sixteen_price_list'].cast<String, String>() ??
-                  <String, String>{},
-          fifteenPriceList:
-              element.data()['fifteen_price_list'].cast<String, String>() ??
-                  <String, String>{},
+          sixteenPriceList: element.data()['sixteen_price_list'] != null
+              ? element.data()['sixteen_price_list'].cast<String, String>()
+              : <String, String>{},
+          fifteenPriceList: element.data()['fifteen_price_list'] != null
+              ? element.data()['fifteen_price_list'].cast<String, String>()
+              : <String, String>{},
         );
         var existingItem = _goldShopLst.firstWhere(
             (itemToCheck) => goldObj.isEqual(itemToCheck),
@@ -212,10 +238,32 @@ class GoldShopController with ChangeNotifier {
     });
   }
 
+  Future<void> listenGoldShopDatabase() async {
+    FirebaseFirestore.instance
+        .collection('goldShop')
+        .orderBy(isSortByName ? 'name' : 'sixteen_price',
+            descending: !isAscending)
+        .snapshots()
+        .listen((event) {
+      if (event.docChanges.isNotEmpty) {
+        for (int i = 0; i < event.docChanges.length; i++) {
+          if (event.docChanges[i].doc.data() != null) {
+            Gold gold = Gold.fromFirebase(event.docChanges[i].doc.data()!);
+            _goldShopLst
+                .removeWhere((itemToCheck) => gold.id == itemToCheck.id);
+
+            _goldShopLst.add(gold);
+          }
+        }
+      }
+      setFilterGoldLst();
+      // log(event.docChanges.toString());
+    });
+  }
+
   setFilterGoldLst() {
     if (searchTerm.isEmpty) {
       _filterGoldShopLst = _goldShopLst;
-      notifyListeners();
     } else {
       _filterGoldShopLst = [];
       notifyListeners();
@@ -224,8 +272,8 @@ class GoldShopController with ChangeNotifier {
           _filterGoldShopLst.add(gold);
         }
       }
-      notifyListeners();
     }
+    notifyListeners();
   }
 
   static void checkGoldPassword(
@@ -248,16 +296,24 @@ class GoldShopController with ChangeNotifier {
     });
   }
 
-  updateGoldData(String id, Map<String, dynamic> data,
+  updateGoldData(String id, Map<String, dynamic> data, bool isUpdatedImage,
+      String imageDownloadUrl,
       {VoidCallback? successCallback,
       Function(dynamic error)? failureCallback}) {
     FocusManager.instance.primaryFocus?.unfocus();
+    Map<String, dynamic> updateData = Map<String, dynamic>.from(data);
+    if (!isUpdatedImage) {
+      updateData.remove('imageUrl');
+    }
     FirebaseFirestore.instance
         .collection('goldShop')
         .doc(id)
-        .update(data)
+        .update(updateData)
         .then((_) {
-      currentEditGold = Gold.fromJson(data);
+      if (isUpdatedImage) {
+        data['imageUrl'] = imageDownloadUrl;
+      }
+      currentEditGold = Gold.fromFirebase(data);
       successCallback?.call();
       getGoldShopData();
       notifyListeners();
@@ -267,6 +323,80 @@ class GoldShopController with ChangeNotifier {
         failureCallback?.call(error);
       },
     );
+  }
+
+  insertGoldData(
+      Map<String, dynamic> data, bool isInsertedImage, String imageDownloadUrl,
+      {VoidCallback? successCallback,
+      Function(dynamic error)? failureCallback}) {
+    FocusManager.instance.primaryFocus?.unfocus();
+    Map<String, dynamic> insertData = Map<String, dynamic>.from(data);
+    if (!isInsertedImage) {
+      insertData.remove('imageUrl');
+    }
+
+    FirebaseFirestore.instance
+        .collection('goldShop')
+        .add(data)
+        .then((documentSnapshot) {
+      updateGoldData(
+        documentSnapshot.id,
+        {"id": documentSnapshot.id},
+        isInsertedImage,
+        imageDownloadUrl,
+        successCallback: successCallback,
+        failureCallback: failureCallback,
+      );
+    }).catchError(
+      (error) {
+        log('Insert failed: $error');
+        failureCallback?.call(error);
+      },
+    );
+  }
+
+  deleteGoldData(String id,
+      {VoidCallback? successCallback,
+      Function(dynamic error)? failureCallback}) {
+    FocusManager.instance.primaryFocus?.unfocus();
+    FirebaseFirestore.instance
+        .collection('goldShop')
+        .doc(id)
+        .delete()
+        .then((_) {
+      successCallback?.call();
+      getGoldShopData();
+      notifyListeners();
+    }).catchError(
+      (error) {
+        log('Delete failed: $error');
+        failureCallback?.call(error);
+      },
+    );
+  }
+
+  void fetchInsertOrUpdateGold(Gold? gold, Map<String, dynamic> data,
+      bool isInsertedOrUpdatedImage, String imageDownloadUrl,
+      {VoidCallback? successCallback,
+      Function(dynamic error)? failureCallback}) {
+    if (gold == null || gold.id.isEmpty || gold.id == '0') {
+      insertGoldData(
+        data,
+        isInsertedOrUpdatedImage,
+        imageDownloadUrl,
+        successCallback: successCallback,
+        failureCallback: failureCallback,
+      );
+    } else {
+      updateGoldData(
+        gold.id,
+        data,
+        isInsertedOrUpdatedImage,
+        imageDownloadUrl,
+        successCallback: successCallback,
+        failureCallback: failureCallback,
+      );
+    }
   }
 
   void pickImage(
@@ -290,37 +420,39 @@ class GoldShopController with ChangeNotifier {
     }
   }
 
-  Future uploadPic(BuildContext context) async {
+  Future<String> uploadPic(BuildContext context) async {
     FirebaseStorage storage = FirebaseStorage.instance;
     if (pickedImageFile == null) {
       showSimpleSnackBar(context, "Your picked image is invalid!", Colors.red);
-      return;
+      return "";
     }
 
     try {
       final String fileName = path.basename(pickedImageFile!.path);
       File imageFile = File(pickedImageFile!.path);
       try {
-        await storage.ref(fileName).putFile(imageFile).then((snapshot) async {
-          var medaData = await snapshot.ref.getMetadata();
-          var oldImageUrl = currentEditGold.imageUrl;
-          currentEditGold.imageUrl =
-              'gs://${medaData.bucket ?? ''}/${medaData.fullPath}';
+        var snapshot = await storage.ref(fileName).putFile(imageFile);
 
-          if (oldImageUrl.isNotEmpty) {
-            await storage.refFromURL(oldImageUrl).delete();
-          }
-          notifyListeners();
-        });
+        var medaData = await snapshot.ref.getMetadata();
+        var oldImageUrl = currentEditGold.imageUrl;
+        currentEditGold.imageUrl =
+            'gs://${medaData.bucket ?? ''}/${medaData.fullPath}';
+
+        if (oldImageUrl.isNotEmpty) {
+          await storage.refFromURL(oldImageUrl).delete();
+        }
+        return await snapshot.ref.getDownloadURL();
       } on FirebaseException catch (e) {
         if (kDebugMode) {
-          print(e);
+          log(e.toString());
         }
       }
+      return "";
     } catch (err) {
       if (kDebugMode) {
-        print(err);
+        log(err.toString());
       }
+      return "";
     }
   }
 

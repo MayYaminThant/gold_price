@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -12,12 +11,12 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
+import '../../util/common_util.dart';
 import '../../util/image_util.dart';
 import 'main_page.dart';
 
 class GoldDetail extends StatefulWidget {
-  const GoldDetail({Key? key, required this.gold}) : super(key: key);
-  final Gold gold;
+  const GoldDetail({Key? key}) : super(key: key);
 
   @override
   GoldDetailState createState() => GoldDetailState();
@@ -29,6 +28,11 @@ class GoldDetailState extends State<GoldDetail> {
   final GlobalKey<FormState> _keyDialogForm = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
+    Gold gold = context.read<GoldShopController>().goldForDetail;
+    CommonUtil.doInFuture(() {
+      gold = context.read<GoldShopController>().goldForDetail;
+      setState(() {});
+    });
     final TextTheme textTheme = Theme.of(context).textTheme;
     return WillPopScope(
       onWillPop: () => Future.value(false),
@@ -38,21 +42,21 @@ class GoldDetailState extends State<GoldDetail> {
           child: CustomScrollView(
             scrollBehavior: const ScrollBehavior(),
             slivers: <Widget>[
-              sliverAppBar(),
-              sliverAppBarForPrice('16 ပဲရည်', ': ${widget.gold.sixteenPrice}'),
-              sliverAppBarForPrice('15 ပဲရည်', ': ${widget.gold.fifteenPrice}'),
-              sliverListCard(textTheme, infoView()),
-              sliverListCard(
-                textTheme,
-                // SizedBox(
-                //   width: double.infinity,
-                //   child: SingleChildScrollView(
-                //     scrollDirection: Axis.horizontal,
-                //     child:
-                chartWidget(widget.gold.sixteenPriceList),
-                //   ),
-                // ),
-              ),
+              sliverAppBar(gold),
+              sliverAppBarForPrice('16 ပဲရည်', ': ${gold.sixteenPrice}'),
+              sliverAppBarForPrice('15 ပဲရည်', ': ${gold.fifteenPrice}'),
+              sliverListCard(textTheme, infoView(gold)),
+              // sliverListCard(
+              //   textTheme,
+              //   // SizedBox(
+              //   //   width: double.infinity,
+              //   //   child: SingleChildScrollView(
+              //   //     scrollDirection: Axis.horizontal,
+              //   //     child:
+              //   chartWidget(gold.sixteenPriceList),
+              //   //   ),
+              //   // ),
+              // ),
               const SliverPadding(
                 sliver: SliverToBoxAdapter(
                     child: SizedBox(
@@ -65,7 +69,7 @@ class GoldDetailState extends State<GoldDetail> {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            showTitleDialog();
+            showTitleDialog(gold);
           },
           child: const Icon(Icons.edit),
         ),
@@ -73,7 +77,7 @@ class GoldDetailState extends State<GoldDetail> {
     );
   }
 
-  SliverAppBar sliverAppBar() {
+  SliverAppBar sliverAppBar(Gold gold) {
     return SliverAppBar(
       pinned: true,
       stretch: true, // fetchData
@@ -105,7 +109,7 @@ class GoldDetailState extends State<GoldDetail> {
           StretchMode.blurBackground,
         ],
         title: Text(
-          widget.gold.name,
+          gold.name,
           style: const TextStyle(
             color: Colors.white,
             fontSize: 19,
@@ -122,12 +126,41 @@ class GoldDetailState extends State<GoldDetail> {
                 Colors.transparent,
               ])),
           child: Image.network(
-            widget.gold.imageUrl,
+            gold.imageUrl,
             fit: BoxFit.cover,
             errorBuilder: (_, __, ___) => getErrorImage(context),
           ),
         ),
       ),
+      actions: [
+        Consumer<GoldShopController>(
+          builder: (_, controller, __) => IconButton(
+              onPressed: () {
+                controller.deleteGoldData(
+                  gold.id,
+                  successCallback: () {
+                    showSimpleSnackBar(
+                      context,
+                      'Delete Successful',
+                      Colors.green.shade200,
+                    );
+                  },
+                  failureCallback: (dynamic error) {
+                    showSimpleSnackBar(
+                      context,
+                      'Delete Failed: $error',
+                      Colors.green.shade200,
+                    );
+                  },
+                );
+              },
+              icon: const Icon(
+                Icons.delete_forever_rounded,
+                size: 30,
+                color: Colors.red,
+              )),
+        ),
+      ],
     );
   }
 
@@ -183,7 +216,7 @@ class GoldDetailState extends State<GoldDetail> {
     );
   }
 
-  Widget infoView() {
+  Widget infoView(Gold gold) {
     return ExpansionTile(
       title: const Padding(
         padding: EdgeInsets.only(left: 8.0),
@@ -195,13 +228,11 @@ class GoldDetailState extends State<GoldDetail> {
       ),
       initiallyExpanded: true,
       children: [
-        goldDetailRow('Phone No.', widget.gold.phoneNo, ServiceAction.phone),
-        goldDetailRow('Facebook', widget.gold.facebook, ServiceAction.facebook),
-        goldDetailRow('Website', widget.gold.website, ServiceAction.website),
-        goldDetailRow(
-            'Created Date', widget.gold.createdDate, ServiceAction.none),
-        goldDetailRow(
-            'Modified Date', widget.gold.modifiedDate, ServiceAction.none),
+        goldDetailRow('Phone No.', gold.phoneNo, ServiceAction.phone),
+        goldDetailRow('Facebook', gold.facebook, ServiceAction.facebook),
+        goldDetailRow('Website', gold.website, ServiceAction.website),
+        goldDetailRow('Created Date', gold.createdDate, ServiceAction.none),
+        goldDetailRow('Modified Date', gold.modifiedDate, ServiceAction.none),
       ],
     );
   }
@@ -348,7 +379,7 @@ class GoldDetailState extends State<GoldDetail> {
     return chartData;
   }
 
-  Future showTitleDialog() {
+  Future showTitleDialog(Gold gold) {
     return showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -389,7 +420,7 @@ class GoldDetailState extends State<GoldDetail> {
                   },
                   textInputAction: TextInputAction.done,
                   onFieldSubmitted: (String text) {
-                    goToGoldEditorPage();
+                    goToGoldEditorPage(gold);
                   },
                 )
               ],
@@ -398,7 +429,7 @@ class GoldDetailState extends State<GoldDetail> {
           actions: <Widget>[
             ElevatedButton(
               onPressed: () {
-                goToGoldEditorPage();
+                goToGoldEditorPage(gold);
               },
               child: const Text('Save'),
             ),
@@ -414,19 +445,19 @@ class GoldDetailState extends State<GoldDetail> {
     );
   }
 
-  void goToGoldEditorPage() {
+  void goToGoldEditorPage(Gold gold) {
     if (_keyDialogForm.currentState != null &&
         _keyDialogForm.currentState!.validate()) {
       _keyDialogForm.currentState!.save();
 
       GoldShopController.checkGoldPassword(
-        widget.gold.id,
+        gold.id,
         pswController.text,
         () {
           pswController.text = "";
           Navigator.pop(context);
           context.read<BottomNavController>().selectedIndex = 1;
-          context.read<GoldShopController>().currentEditGold = widget.gold;
+          context.read<GoldShopController>().currentEditGold = gold;
           Navigator.push(
             context,
             MaterialPageRoute(
