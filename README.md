@@ -5,4 +5,4 @@
 ![Gold Confirmation](assets/images/gold_price_confirmation.png?raw=true "Gold Confirmation")
 ![Gold Calculation](assets/images/calculation_of_gold_price.png?raw=true "Gold Calculation")
 
-<img src="https://github.com/MayYaminThant/gold_price/main/assets/images/gold_price_main_page.png?raw=true" height="60" width="60" >
+<img src="https://github.com/MayYaminThant/gold_price/blob/main/assets/images/gold_price_main_page.png?raw=true" height="60" width="60" >
