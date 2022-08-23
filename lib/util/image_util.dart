@@ -5,7 +5,7 @@ Widget getErrorImage(BuildContext context) {
   return SizedBox(
     width: ScreenSizeUtil.getScreenWidth(context),
     child: Image.asset(
-      'assets/images/4.jpg',
+      'assets/images/no_image_available.jpg',
       color: Colors.grey.withOpacity(0.5),
       colorBlendMode: BlendMode.srcOver,
       fit: BoxFit.cover,

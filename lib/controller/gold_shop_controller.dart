@@ -40,7 +40,7 @@ class GoldShopController with ChangeNotifier {
   File? get pickedImageFile => _pickedImageFile;
 
   // ignore: prefer_final_fields
-  Image _goldImage = Image.asset('assets/images/4.jpg');
+  Image _goldImage = Image.asset('assets/images/no_image_available.jpg');
   Image get goldImage => _goldImage;
 
   set goldImage(Image pickedFile) {
