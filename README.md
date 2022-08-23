@@ -1,16 +1,6 @@
 # gold_price
 
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+![Gold Main Page](/repository/assets/gold_price_main_page.png?raw=true "Gold Main Page")
+![Gold Detail](/repository/assets/gold_price_detail_weekly_analysis.png?raw=true "Gold Detail")
+![Gold Confirmation](/repository/assets/gold_price_confirmation.png?raw=true "Gold Confirmation")
+![Gold Calculation](/repository/assets/calculation_of_gold_price.png?raw=true "Gold Calculation")
