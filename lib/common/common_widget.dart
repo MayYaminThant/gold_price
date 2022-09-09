@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -128,6 +130,15 @@ getDateWithCustomFormat(value, String datePattern) {
   var dateFormat =
       dateParse != null ? DateFormat(datePattern).format(dateParse) : '';
   return dateFormat;
+}
+
+Map<String, String> sortPriceListMapByDate(Map<String, String> priceList) {
+  SplayTreeMap<String, String>.from(priceList, (keys1, keys2) {
+    DateTime dt1 = DateFormat(dateFormatDayMonthYearHourMinSecond).parse(keys1);
+    DateTime dt2 = DateFormat(dateFormatDayMonthYearHourMinSecond).parse(keys2);
+    return dt2.compareTo(dt1);
+  });
+  return priceList;
 }
 
 typedef GetGoldCallBack = void Function(Gold gold);

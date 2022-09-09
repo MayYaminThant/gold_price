@@ -220,10 +220,12 @@ class GoldShopController with ChangeNotifier {
           modifiedDate: modifiedDate,
           color: element.data()['color_hex'] ?? '',
           sixteenPriceList: element.data()['sixteen_price_list'] != null
-              ? element.data()['sixteen_price_list'].cast<String, String>()
+              ? sortPriceListMapByDate(
+                  element.data()['sixteen_price_list'].cast<String, String>())
               : <String, String>{},
           fifteenPriceList: element.data()['fifteen_price_list'] != null
-              ? element.data()['fifteen_price_list'].cast<String, String>()
+              ? sortPriceListMapByDate(
+                  element.data()['fifteen_price_list'].cast<String, String>())
               : <String, String>{},
         );
         var existingItem = _goldShopLst.firstWhere(

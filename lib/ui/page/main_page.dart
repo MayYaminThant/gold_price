@@ -67,19 +67,21 @@ class MainPageState extends State<MainPage> {
       builder: (_, goldController, __) => Consumer<BottomNavController>(
           builder: (_, controller, __) => BottomNavigationBar(
                 currentIndex: controller.selectedIndex,
+                showSelectedLabels: false,
+                showUnselectedLabels: false,
                 items: [
                   const BottomNavigationBarItem(
-                    icon: Icon(Icons.home),
+                    icon: Icon(Icons.home, size: 32),
                     label: "Home",
                   ),
                   BottomNavigationBarItem(
-                    icon: const Icon(Icons.search),
+                    icon: const Icon(Icons.add_box, size: 30),
                     label: goldController.currentEditGold.name.isNotEmpty
                         ? "Update"
                         : "Add",
                   ),
                   const BottomNavigationBarItem(
-                    icon: Icon(Icons.shopping_cart),
+                    icon: Icon(Icons.calculate, size: 30),
                     label: "Calculate",
                   ),
                 ],

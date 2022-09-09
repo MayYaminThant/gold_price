@@ -69,7 +69,9 @@ class GoldDetailState extends State<GoldDetail> {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            showTitleDialog(gold);
+            _showPasswordConfirmationDialog(submittedCallback: () {
+              goToGoldEditorPage(gold);
+            });
           },
           child: const Icon(Icons.edit),
         ),
@@ -133,34 +135,42 @@ class GoldDetailState extends State<GoldDetail> {
         ),
       ),
       actions: [
-        Consumer<GoldShopController>(
-          builder: (_, controller, __) => IconButton(
-              onPressed: () {
-                controller.deleteGoldData(
-                  gold.id,
-                  successCallback: () {
-                    showSimpleSnackBar(
-                      context,
-                      'Delete Successful',
-                      Colors.green.shade200,
-                    );
-                  },
-                  failureCallback: (dynamic error) {
-                    showSimpleSnackBar(
-                      context,
-                      'Delete Failed: $error',
-                      Colors.green.shade200,
-                    );
-                  },
-                );
-              },
-              icon: const Icon(
-                Icons.delete_forever_rounded,
-                size: 30,
-                color: Colors.red,
-              )),
-        ),
+        _deleteShopUIAndAction(gold),
       ],
+    );
+  }
+
+  Consumer<GoldShopController> _deleteShopUIAndAction(Gold gold) {
+    return Consumer<GoldShopController>(
+      builder: (_, controller, __) => IconButton(
+          onPressed: () {
+            _showPasswordConfirmationDialog(submittedCallback: () {
+              controller.deleteGoldData(
+                gold.id,
+                successCallback: () {
+                  Navigator.pop(context);
+                  showSimpleSnackBar(
+                    context,
+                    'Delete Successful',
+                    Colors.green.shade200,
+                  );
+                },
+                failureCallback: (dynamic error) {
+                  Navigator.pop(context);
+                  showSimpleSnackBar(
+                    context,
+                    'Delete Failed: $error',
+                    Colors.green.shade200,
+                  );
+                },
+              );
+            });
+          },
+          icon: const Icon(
+            Icons.delete_forever_rounded,
+            size: 30,
+            color: Colors.red,
+          )),
     );
   }
 
@@ -379,7 +389,8 @@ class GoldDetailState extends State<GoldDetail> {
     return chartData;
   }
 
-  Future showTitleDialog(Gold gold) {
+  Future _showPasswordConfirmationDialog(
+      {required VoidCallback submittedCallback}) {
     return showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -420,7 +431,7 @@ class GoldDetailState extends State<GoldDetail> {
                   },
                   textInputAction: TextInputAction.done,
                   onFieldSubmitted: (String text) {
-                    goToGoldEditorPage(gold);
+                    submittedCallback.call();
                   },
                 )
               ],
@@ -429,9 +440,9 @@ class GoldDetailState extends State<GoldDetail> {
           actions: <Widget>[
             ElevatedButton(
               onPressed: () {
-                goToGoldEditorPage(gold);
+                submittedCallback.call();
               },
-              child: const Text('Save'),
+              child: const Text('Confirm'),
             ),
             ElevatedButton(
                 onPressed: () {

@@ -63,26 +63,26 @@ class HomePageState extends State<HomePage> {
   }
 
   SliverAppBar sliverAppBar() {
-    return SliverAppBar(
+    return const SliverAppBar(
       elevation: 0,
       pinned: true,
       // stretch: true,
       // onStretchTrigger: () async {
       //   setState(() {});
       // },
-      actions: [
-        IconButton(
-          onPressed: () {
-            Scaffold.of(context).openEndDrawer();
-          },
-          icon: const Icon(
-            Icons.menu,
-            color: Colors.black,
-          ),
-        ),
-      ],
+      // actions: [
+      //   IconButton(
+      //     onPressed: () {
+      //       Scaffold.of(context).openEndDrawer();
+      //     },
+      //     icon: const Icon(
+      //       Icons.menu,
+      //       color: Colors.black,
+      //     ),
+      //   ),
+      // ],
       backgroundColor: Colors.white,
-      flexibleSpace: const FlexibleSpaceBar(
+      flexibleSpace: FlexibleSpaceBar(
         centerTitle: true,
         title: Text(
           'နောက်ဆုံးရ ရွှေစျေးနှုန်းများ',
