@@ -1,9 +1,9 @@
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
-import 'package:gold_price/controller/calculate_page_controller.dart';
-import 'package:gold_price/model/calculating_gold.dart';
-import 'package:gold_price/util/common_util.dart';
-import 'package:gold_price/util/screen_util.dart';
+import '../../controller/calculate_page_controller.dart';
+import '../../model/calculating_gold.dart';
+import '../../util/common_util.dart';
+import '../../util/screen_util.dart';
 import 'package:provider/provider.dart';
 
 class CalculatePage extends StatefulWidget {
@@ -87,7 +87,7 @@ class CalculatePageState extends State<CalculatePage> {
         bottom: 0,
       ),
       decoration:
-          _calculatedBoxDecoration(Colors.pink[50], Colors.pink.shade200),
+          _calculatedBoxDecoration(const Color.fromRGBO(208, 241, 240, 1)),
       child: Consumer<CalulatePageController>(builder: (_, controller, __) {
         if (controller.calculatedAmount > 0) {
           _calculatedGoldPriceTextController.text =
@@ -122,11 +122,6 @@ class CalculatePageState extends State<CalculatePage> {
             _paeTextController.clear();
             _ywayTextController.clear();
           },
-          ScreenSizeUtil.getScreenWidth(context) - 110,
-          Colors.pink.shade800,
-          Colors.pink.shade100,
-          Colors.pink.shade300,
-          Colors.pink.shade500,
         );
       }),
     );
@@ -143,7 +138,7 @@ class CalculatePageState extends State<CalculatePage> {
         bottom: 0,
       ),
       decoration:
-          _calculatedBoxDecoration(Colors.green.shade50, Colors.green.shade200),
+          _calculatedBoxDecoration(const Color.fromRGBO(187, 217, 236, 1)),
       child: Consumer<CalulatePageController>(builder: (_, controller, __) {
         if (controller.calculatedAmount > 0) {
           _calculatedGoldPriceTextController.text =
@@ -178,11 +173,6 @@ class CalculatePageState extends State<CalculatePage> {
             controller.calculatedAmount = 0;
             _calculatedGoldPriceTextController.clear();
           },
-          ScreenSizeUtil.getScreenWidth(context) - 110,
-          Colors.green.shade800,
-          Colors.green.shade200,
-          Colors.green.shade400,
-          Colors.green.shade700,
         );
       }),
     );
@@ -199,8 +189,8 @@ class CalculatePageState extends State<CalculatePage> {
       child: Container(
         width: ScreenSizeUtil.getScreenWidth(context),
         height: (ScreenSizeUtil.getScreenHeight(context) / 3) - 150,
-        decoration: _calculatedBoxDecoration(
-            Colors.lightBlue.shade50, Colors.lightBlue.shade200),
+        decoration:
+            _calculatedBoxDecoration(const Color.fromRGBO(145, 197, 194, 1)),
         child: Consumer<CalulatePageController>(
           builder: (_, controller, __) {
             if (controller.calculatingGold.kyat != null) {
@@ -229,11 +219,6 @@ class CalculatePageState extends State<CalculatePage> {
                 controller.calculatingGold.kyat = 0;
                 _kyatTextController.clear();
               },
-              ScreenSizeUtil.getScreenWidth(context) - 110,
-              Colors.blue.shade800,
-              Colors.blue.shade200,
-              Colors.blue.shade400,
-              Colors.blue.shade700,
             );
           },
         ),
@@ -252,8 +237,8 @@ class CalculatePageState extends State<CalculatePage> {
       child: Container(
         width: ScreenSizeUtil.getScreenWidth(context),
         height: (ScreenSizeUtil.getScreenHeight(context) / 3) - 150,
-        decoration: _calculatedBoxDecoration(
-            Colors.amber.shade50, Colors.amber.shade200),
+        decoration:
+            _calculatedBoxDecoration(const Color.fromRGBO(119, 164, 194, 1)),
         child: Consumer<CalulatePageController>(
           builder: (_, controller, __) {
             if (controller.calculatingGold.pae != null) {
@@ -282,11 +267,6 @@ class CalculatePageState extends State<CalculatePage> {
                 controller.calculatingGold.pae = 0;
                 _paeTextController.clear();
               },
-              ScreenSizeUtil.getScreenWidth(context) - 110,
-              Colors.amber.shade800,
-              Colors.amber.shade200,
-              Colors.amber.shade500,
-              Colors.amber.shade700,
             );
           },
         ),
@@ -305,8 +285,8 @@ class CalculatePageState extends State<CalculatePage> {
       child: Container(
         width: ScreenSizeUtil.getScreenWidth(context),
         height: (ScreenSizeUtil.getScreenHeight(context) / 3) - 150,
-        decoration: _calculatedBoxDecoration(
-            Colors.purple.shade50, Colors.purple.shade200),
+        decoration:
+            _calculatedBoxDecoration(const Color.fromRGBO(177, 208, 217, 1)),
         child: Consumer<CalulatePageController>(
           builder: (_, controller, __) {
             if (controller.calculatingGold.yway != null) {
@@ -335,11 +315,6 @@ class CalculatePageState extends State<CalculatePage> {
                 controller.calculatingGold.yway = 0;
                 _ywayTextController.clear();
               },
-              ScreenSizeUtil.getScreenWidth(context) - 110,
-              Colors.purple.shade800,
-              Colors.purple.shade200,
-              Colors.purple.shade600,
-              Colors.purple.shade700,
             );
           },
         ),
@@ -358,25 +333,10 @@ class CalculatePageState extends State<CalculatePage> {
     controller.calculatedAmount = kyatVal + paeVal + ywayVal;
   }
 
-  BoxDecoration _calculatedBoxDecoration(color, boxShadowColor) {
+  BoxDecoration _calculatedBoxDecoration(color) {
     return BoxDecoration(
       color: color,
-      border: Border.all(color: boxShadowColor),
       borderRadius: BorderRadius.circular(6),
-      // boxShadow: [
-      //   BoxShadow(
-      //     color: boxShadowColor,
-      //     offset: const Offset(2, 3),
-      //     blurRadius: 10,
-      //     spreadRadius: 0.05,
-      //   ),
-      //   const BoxShadow(
-      //     color: Colors.white,
-      //     offset: Offset(-4, -4),
-      //     blurRadius: 10,
-      //     spreadRadius: 1,
-      //   ),
-      // ],
     );
   }
 
@@ -386,11 +346,6 @@ class CalculatePageState extends State<CalculatePage> {
     CalulatePageController controller,
     Function(String) stringCallback,
     VoidCallback clearCallback,
-    double width,
-    Color color1,
-    Color color2,
-    Color color3,
-    Color color4,
   ) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -400,13 +355,16 @@ class CalculatePageState extends State<CalculatePage> {
           padding: const EdgeInsets.only(left: 22.0, top: 3, bottom: 5),
           child: Text(
             title,
-            style: TextStyle(color: color1, fontSize: 18, letterSpacing: 1),
+            style: const TextStyle(
+                color: Color.fromRGBO(21, 76, 121, 1),
+                fontSize: 18,
+                letterSpacing: 1),
           ),
         ),
-        DottedLine(
-          dashColor: color4,
-          lineThickness: 0.4,
-          dashLength: 4.8,
+        const DottedLine(
+          dashColor: Colors.white,
+          lineThickness: 1,
+          dashLength: 6,
         ),
         Container(
           padding: const EdgeInsets.only(left: 8.0, right: 8.0),
@@ -416,9 +374,13 @@ class CalculatePageState extends State<CalculatePage> {
                 child: TextFormField(
                     keyboardType: TextInputType.number,
                     cursorWidth: 2.5,
-                    cursorColor: color1,
+                    cursorColor: Colors.white,
                     controller: textEditingController,
-                    style: const TextStyle(letterSpacing: 4, fontSize: 20),
+                    style: const TextStyle(
+                      letterSpacing: 4,
+                      fontSize: 20,
+                      color: Color.fromRGBO(6, 57, 112, 1),
+                    ),
                     decoration: InputDecoration(
                       focusedBorder: InputBorder.none,
                       enabledBorder: InputBorder.none,
@@ -427,8 +389,11 @@ class CalculatePageState extends State<CalculatePage> {
                       hintText: controller.calculateGoldType
                           ? 'Enter Gold Price'
                           : '0',
-                      hintStyle: TextStyle(
-                          color: color2, letterSpacing: 4, fontSize: 20),
+                      hintStyle: const TextStyle(
+                        color: Color.fromRGBO(150, 163, 157, 1),
+                        letterSpacing: 4,
+                        fontSize: 20,
+                      ),
                     ),
                     onFieldSubmitted: (value) => stringCallback(value),
                     validator: (value) {
@@ -443,11 +408,12 @@ class CalculatePageState extends State<CalculatePage> {
                 IconButton(
                   onPressed: () {
                     clearCallback();
+                    stringCallback(textEditingController.text);
                   },
                   icon: Icon(
                     Icons.cancel_rounded,
                     size: 32,
-                    color: color1,
+                    color: Colors.grey[800],
                   ),
                 ),
             ],

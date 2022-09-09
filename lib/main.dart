@@ -1,5 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:gold_price/controller/bottom_nav_controller.dart';
+import '../../controller/bottom_nav_controller.dart';
 
 import 'controller/calculate_page_controller.dart';
 import 'controller/gold_shop_controller.dart';

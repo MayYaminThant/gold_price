@@ -1,12 +1,12 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:gold_price/common/common_widget.dart';
-import 'package:gold_price/controller/bottom_nav_controller.dart';
-import 'package:gold_price/controller/gold_shop_controller.dart';
-import 'package:gold_price/model/gold.dart';
-import 'package:gold_price/model/gold_price_rate.dart';
-import 'package:gold_price/util/screen_util.dart';
+import '../../common/common_widget.dart';
+import '../../controller/bottom_nav_controller.dart';
+import '../../controller/gold_shop_controller.dart';
+import '../../model/gold.dart';
+import '../../model/gold_price_rate.dart';
+import '../../util/screen_util.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gold_price/util/screen_util.dart';
+import '../../util/screen_util.dart';
 
 Widget getErrorImage(BuildContext context) {
   return SizedBox(

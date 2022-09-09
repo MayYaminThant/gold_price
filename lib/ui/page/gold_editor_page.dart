@@ -1,12 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:gold_price/common/common_widget.dart';
-import 'package:gold_price/controller/bottom_nav_controller.dart';
-import 'package:gold_price/controller/gold_shop_controller.dart';
-import 'package:gold_price/model/gold.dart';
-import 'package:gold_price/util/common_util.dart';
-import 'package:gold_price/util/image_util.dart';
-import 'package:gold_price/util/screen_util.dart';
+import '../../common/common_widget.dart';
+import '../../controller/bottom_nav_controller.dart';
+import '../../controller/gold_shop_controller.dart';
+import '../../model/gold.dart';
+import '../../util/common_util.dart';
+import '../../util/image_util.dart';
+import '../../util/screen_util.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 

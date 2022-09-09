@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gold_price/model/calculating_gold.dart';
+import '../../model/calculating_gold.dart';
 
 class CalulatePageController with ChangeNotifier {
   CalulatePageController();

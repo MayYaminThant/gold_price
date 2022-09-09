@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
-import 'package:gold_price/common/common_widget.dart';
-import 'package:gold_price/controller/bottom_nav_controller.dart';
-import 'package:gold_price/controller/gold_shop_controller.dart';
-import 'package:gold_price/model/gold.dart';
-import 'package:gold_price/ui/page/calculate_page.dart';
-import 'package:gold_price/ui/page/gold_editor_page.dart';
-import 'package:gold_price/ui/page/home_page.dart';
-import 'package:gold_price/util/common_util.dart';
+import '../../common/common_widget.dart';
+import '../../controller/bottom_nav_controller.dart';
+import '../../controller/gold_shop_controller.dart';
+import '../../model/gold.dart';
+import '../../ui/page/calculate_page.dart';
+import '../../ui/page/gold_editor_page.dart';
+import '../../ui/page/home_page.dart';
+import '../../util/common_util.dart';
 import 'package:provider/provider.dart';
 
 final bodyTags = [

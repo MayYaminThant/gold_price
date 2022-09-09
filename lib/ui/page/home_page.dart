@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:gold_price/common/color_extension.dart';
-import 'package:gold_price/common/common_widget.dart';
-import 'package:gold_price/controller/gold_shop_controller.dart';
-import 'package:gold_price/model/gold.dart';
-import 'package:gold_price/ui/page/gold_detail.dart';
-import 'package:gold_price/util/screen_util.dart';
+import '../../common/color_extension.dart';
+import '../../common/common_widget.dart';
+import '../../controller/gold_shop_controller.dart';
+import '../../model/gold.dart';
+import '../../ui/page/gold_detail.dart';
+import '../../util/screen_util.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
