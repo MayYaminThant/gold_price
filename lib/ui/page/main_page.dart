@@ -33,7 +33,6 @@ class MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     CommonUtil.doInFuture(() {
       context.read<GoldShopController>().getGoldShopData();
-      // context.read<GoldShopController>().listenGoldShopDatabase();
     });
     return SafeArea(
       child: Scaffold(
@@ -51,7 +50,6 @@ class MainPageState extends State<MainPage> {
               child: Consumer<BottomNavController>(
                 builder: (_, controller, __) =>
                     bodyTags.elementAt(controller.selectedIndex),
-                // const CalculatePage(),
               ),
             ),
           ),
@@ -66,6 +64,8 @@ class MainPageState extends State<MainPage> {
     return Consumer<GoldShopController>(
       builder: (_, goldController, __) => Consumer<BottomNavController>(
           builder: (_, controller, __) => BottomNavigationBar(
+                selectedItemColor: const Color.fromRGBO(26, 142, 150, 1),
+                unselectedItemColor: const Color.fromARGB(255, 130, 191, 173),
                 currentIndex: controller.selectedIndex,
                 showSelectedLabels: false,
                 showUnselectedLabels: false,
@@ -109,8 +109,6 @@ class MainPageState extends State<MainPage> {
     BottomNavController controller,
     int index,
   ) {
-    // FancyBottomNavigationState? navBarState =
-    //     _bottomNavigationKey.currentState as FancyBottomNavigationState?;
     warningDialog(
       context,
       'Current Editing is dismissed data!',
@@ -125,7 +123,6 @@ class MainPageState extends State<MainPage> {
         var preIndex = controller.selectedIndex;
         controller.selectedIndex = index;
         controller.selectedIndex = preIndex;
-        // navBarState?.setPage(controller.selectedIndex);
       },
     );
   }
@@ -138,8 +135,6 @@ class RightDrawerClipper extends CustomClipper<Path> {
 
     path.moveTo(50, 0);
     path.quadraticBezierTo(0, size.height / 2, 50, size.height);
-    // path.lineTo(0, size.height / 2);
-    // path.lineTo(50, size.height);
     path.lineTo(size.width, size.height);
     path.lineTo(size.width, 0);
 
@@ -176,9 +171,12 @@ Row ascendingToggle() {
   return Row(
     mainAxisAlignment: MainAxisAlignment.end,
     children: [
-      const Text(
+      Text(
         'Ascending',
-        style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
+        style: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w500,
+            color: textHeaderSizeColor),
       ),
       const SizedBox(
         width: 10,
@@ -186,10 +184,10 @@ Row ascendingToggle() {
       Consumer<GoldShopController>(
         builder: (_, controller, __) => GFToggle(
           boxShape: BoxShape.rectangle,
-          disabledTrackColor: Colors.grey.shade400,
-          enabledTrackColor: Colors.grey.shade400,
-          disabledThumbColor: Colors.green.shade400,
-          enabledThumbColor: Colors.grey.shade700,
+          disabledTrackColor: const Color.fromRGBO(160, 183, 173, 1),
+          enabledTrackColor: const Color.fromRGBO(160, 183, 173, 1),
+          disabledThumbColor: const Color.fromRGBO(26, 142, 150, 1),
+          enabledThumbColor: const Color.fromRGBO(148, 153, 116, 1),
           onChanged: (isCheck) {
             controller.isAscending = isCheck ?? true;
           },
@@ -206,7 +204,11 @@ Widget checkBoxCustom(String title, bool isName) {
   return Row(mainAxisAlignment: MainAxisAlignment.end, children: [
     Text(
       title,
-      style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
+      style: TextStyle(
+        fontSize: 17,
+        fontWeight: FontWeight.w500,
+        color: textHeaderSizeColor,
+      ),
     ),
     const SizedBox(
       width: 30,
@@ -216,7 +218,7 @@ Widget checkBoxCustom(String title, bool isName) {
       child: Consumer<GoldShopController>(
         builder: (_, controller, __) => GFCheckbox(
           size: 21,
-          activeBgColor: GFColors.SUCCESS,
+          activeBgColor: const Color.fromARGB(255, 251, 184, 156),
           onChanged: (value) {
             controller.isSortByName = isName;
           },

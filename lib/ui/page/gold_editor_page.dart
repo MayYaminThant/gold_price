@@ -45,6 +45,7 @@ class GoldEditorPageState extends State<GoldEditorPage> {
     _websiteTextController.dispose();
     _createdDateTextController.dispose();
     _modifiedDateTextController.dispose();
+    _pswTextController.dispose();
     super.dispose();
   }
 
@@ -67,10 +68,6 @@ class GoldEditorPageState extends State<GoldEditorPage> {
       onWillPop: () => Future.value(false),
       child: Consumer<GoldShopController>(
         builder: (_, controller, __) => Scaffold(
-          // backgroundColor: controller.currentEditGold.color != ""
-          //     ? ColorExtension.fromHex(gold?.color ?? '#ffffff')
-          //     : Colors.white,
-
           body: _mainBody(),
         ),
       ),
@@ -83,7 +80,7 @@ class GoldEditorPageState extends State<GoldEditorPage> {
       floating: true,
       pinned: true,
       elevation: 0,
-      backgroundColor: Colors.grey,
+      backgroundColor: ColorExtension.fromHex(colors[6]),
       leading: Consumer<GoldShopController>(
         builder: (_, controller, __) => IconButton(
           onPressed: () {
@@ -103,21 +100,23 @@ class GoldEditorPageState extends State<GoldEditorPage> {
             }
           },
           icon: controller.isEditing
-              ? const Icon(
+              ? Icon(
                   Icons.close,
                   size: 30,
-                  color: Colors.white,
+                  color: appBarIconColor,
                 )
-              : const Icon(
+              : Icon(
                   Icons.arrow_back_ios,
                   size: 30,
-                  color: Colors.white,
+                  color: appBarIconColor,
                 ),
         ),
       ),
       title: Consumer<GoldShopController>(
         builder: (_, controller, __) => Text(
-            '${controller.currentEditGold.name.isNotEmpty ? 'Edit' : 'Add'} Gold Shop'),
+          '${controller.currentEditGold.name.isNotEmpty ? 'Edit' : 'Add'} Gold Shop',
+          style: TextStyle(color: appBarIconColor),
+        ),
       ),
       flexibleSpace: FlexibleSpaceBar(
         stretchModes: const [
@@ -159,9 +158,9 @@ class GoldEditorPageState extends State<GoldEditorPage> {
                   onPressed: () {
                     _confirmationInsertOrUpdateDataWarningDialog();
                   },
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.check,
-                    color: Colors.white,
+                    color: appBarIconColor,
                     size: 33,
                   ))
               : const SizedBox(),
@@ -170,9 +169,9 @@ class GoldEditorPageState extends State<GoldEditorPage> {
             onPressed: () {
               _showImagePickerDialog(context);
             },
-            icon: const Icon(
+            icon: Icon(
               Icons.add_a_photo,
-              color: Colors.white,
+              color: appBarIconColor,
               size: 33,
             )),
       ],
@@ -285,15 +284,10 @@ class GoldEditorPageState extends State<GoldEditorPage> {
       readOnly: true,
       decoration: InputDecoration(
         labelText: title,
-        border: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: Colors.grey.withAlpha(80),
-            width: 0,
-          ),
-          borderRadius: const BorderRadius.all(
-            Radius.circular(8),
-          ),
-        ),
+        labelStyle: TextStyle(color: ColorExtension.fromHex(colors[8])),
+        border: _borderTextFormField(),
+        enabledBorder: _borderTextFormField(),
+        focusedBorder: _focusedBorderTextFormField(),
       ),
       onTap: () async {
         var date = await showDatePicker(
@@ -317,7 +311,9 @@ class GoldEditorPageState extends State<GoldEditorPage> {
         keyboardType: inputType,
         decoration: InputDecoration(
           labelText: title,
+          labelStyle: TextStyle(color: ColorExtension.fromHex(colors[8])),
           border: _borderTextFormField(),
+          enabledBorder: _borderTextFormField(),
           focusedBorder: _focusedBorderTextFormField(),
         ),
         onChanged: (value) {
@@ -339,7 +335,9 @@ class GoldEditorPageState extends State<GoldEditorPage> {
           keyboardType: TextInputType.visiblePassword,
           decoration: InputDecoration(
             labelText: title,
+            labelStyle: TextStyle(color: ColorExtension.fromHex(colors[8])),
             border: _borderTextFormField(),
+            enabledBorder: _borderTextFormField(),
             focusedBorder: _focusedBorderTextFormField(),
           ),
           onChanged: (value) {
@@ -351,25 +349,25 @@ class GoldEditorPageState extends State<GoldEditorPage> {
   }
 
   OutlineInputBorder _focusedBorderTextFormField() {
-    return const OutlineInputBorder(
-      borderRadius: BorderRadius.all(
+    return OutlineInputBorder(
+      borderRadius: const BorderRadius.all(
         Radius.circular(8),
       ),
       borderSide: BorderSide(
-        color: Color.fromARGB(255, 0, 101, 234),
-        width: 2.5,
+        color: ColorExtension.fromHex(colors[5]),
+        width: 3,
       ),
     );
   }
 
   OutlineInputBorder _borderTextFormField() {
-    return const OutlineInputBorder(
-      borderRadius: BorderRadius.all(
+    return OutlineInputBorder(
+      borderRadius: const BorderRadius.all(
         Radius.circular(8),
       ),
       borderSide: BorderSide(
-        color: Colors.grey,
-        width: 1,
+        color: ColorExtension.fromHex(colors[5]),
+        width: 0.7,
       ),
     );
   }
@@ -558,7 +556,6 @@ Widget colorBuilderContainer(GoldShopController controller, int index) {
         margin: const EdgeInsets.all(5),
         decoration: BoxDecoration(
             color: ColorExtension.fromHex(colors[index]),
-            // border: Border.all(color: Colors.white),
             borderRadius: BorderRadius.circular(40)),
         child: ((controller.currentEditGold.color.isEmpty && index == 0) ||
                 (controller.currentEditGold.color != "" &&

@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 import '../model/gold.dart';
+import 'color_extension.dart';
 
 const String dateFormatDayMonthYearHourMinSecond = 'dd/MM/yyyy HH:mm:ss';
 
@@ -14,32 +15,18 @@ Color get grey300 {
 }
 
 List<String> colors = [
-  '#A3BFD4',
-  '#C6DAB0',
-  '#DABAC3',
-  '#D4C6A3',
-  '#DAB0B0',
-  '#A3D4B9',
-  '#D2B0DA',
-  '#816F7A',
-  '#A37E4D',
-  '#C595A5',
-  '#C59595',
+  '#b1d0d9',
+  '#64b0bb',
+  '#78b9c8',
+  '#91c5c2',
+  '#f7cfae',
+  '#bbd9ec',
+  '#d0f1f0',
+  '#c2eff1',
+  '#77a4c2',
+  '#96a39d',
+  '#b19393',
 ];
-
-Map<int, Color> colorList = const {
-  50: Color.fromRGBO(163, 191, 212, 1),
-  100: Color.fromRGBO(198, 218, 176, 2),
-  200: Color.fromRGBO(218, 186, 195, 1),
-  300: Color.fromRGBO(212, 198, 163, 1),
-  400: Color.fromRGBO(218, 176, 176, 1),
-  450: Color.fromRGBO(163, 212, 185, 1),
-  500: Color.fromRGBO(210, 176, 218, 1),
-  600: Color.fromRGBO(129, 111, 122, 1),
-  700: Color.fromRGBO(163, 126, 77, 1),
-  800: Color.fromRGBO(197, 149, 165, 1),
-  900: Color.fromRGBO(197, 149, 149, 1),
-};
 
 warningDialog(
   BuildContext context,
@@ -142,3 +129,7 @@ Map<String, String> sortPriceListMapByDate(Map<String, String> priceList) {
 }
 
 typedef GetGoldCallBack = void Function(Gold gold);
+
+Color get textHeaderSizeColor => const Color.fromRGBO(21, 76, 121, 1);
+
+Color get appBarIconColor => ColorExtension.fromHex(colors[10]);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gold_price/ui/page/gold_detail2.dart';
 import '../../common/color_extension.dart';
 import '../../common/common_widget.dart';
 import '../../controller/gold_shop_controller.dart';
@@ -63,31 +64,16 @@ class HomePageState extends State<HomePage> {
   }
 
   SliverAppBar sliverAppBar() {
-    return const SliverAppBar(
+    return SliverAppBar(
       elevation: 0,
       pinned: true,
-      // stretch: true,
-      // onStretchTrigger: () async {
-      //   setState(() {});
-      // },
-      // actions: [
-      //   IconButton(
-      //     onPressed: () {
-      //       Scaffold.of(context).openEndDrawer();
-      //     },
-      //     icon: const Icon(
-      //       Icons.menu,
-      //       color: Colors.black,
-      //     ),
-      //   ),
-      // ],
       backgroundColor: Colors.white,
       flexibleSpace: FlexibleSpaceBar(
         centerTitle: true,
         title: Text(
           'နောက်ဆုံးရ ရွှေစျေးနှုန်းများ',
           style: TextStyle(
-            color: Colors.black,
+            color: textHeaderSizeColor,
             fontSize: 20,
           ),
         ),
@@ -105,7 +91,7 @@ class HomePageState extends State<HomePage> {
           context,
           MaterialPageRoute(
             builder: (context) {
-              return const GoldDetail();
+              return const GoldDetail2();
             },
           ),
         );
@@ -136,7 +122,7 @@ class HomePageState extends State<HomePage> {
         isUpRange
             ? Icons.arrow_circle_up_rounded
             : Icons.arrow_circle_down_rounded,
-        color: isUpRange ? Colors.red : Colors.yellow,
+        color: isUpRange ? Colors.redAccent : Colors.lime[900],
         size: 40,
       ),
     );

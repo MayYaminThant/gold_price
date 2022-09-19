@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
+import '../../common/color_extension.dart';
 import '../../common/common_widget.dart';
 import '../../controller/bottom_nav_controller.dart';
 import '../../controller/gold_shop_controller.dart';
@@ -27,13 +29,19 @@ class GoldDetailState extends State<GoldDetail> {
   final TextEditingController pswController = TextEditingController();
   final GlobalKey<FormState> _keyDialogForm = GlobalKey<FormState>();
   @override
+  void dispose() {
+    titleController.dispose();
+    pswController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     Gold gold = context.read<GoldShopController>().goldForDetail;
     CommonUtil.doInFuture(() {
       gold = context.read<GoldShopController>().goldForDetail;
       setState(() {});
     });
-    final TextTheme textTheme = Theme.of(context).textTheme;
     return WillPopScope(
       onWillPop: () => Future.value(false),
       child: Scaffold(
@@ -43,9 +51,17 @@ class GoldDetailState extends State<GoldDetail> {
             scrollBehavior: const ScrollBehavior(),
             slivers: <Widget>[
               sliverAppBar(gold),
-              sliverAppBarForPrice('16 ပဲရည်', ': ${gold.sixteenPrice}'),
-              sliverAppBarForPrice('15 ပဲရည်', ': ${gold.fifteenPrice}'),
-              sliverListCard(textTheme, infoView(gold)),
+              sliverAppBarForPrice(
+                '16 ပဲရည်',
+                ': ${gold.sixteenPrice}',
+                gold.color,
+              ),
+              sliverAppBarForPrice(
+                '15 ပဲရည်',
+                ': ${gold.fifteenPrice}',
+                gold.color,
+              ),
+              sliverListCard(infoView(gold), gold.color),
               // sliverListCard(
               //   textTheme,
               //   // SizedBox(
@@ -73,6 +89,7 @@ class GoldDetailState extends State<GoldDetail> {
               goToGoldEditorPage(gold);
             });
           },
+          backgroundColor: Colors.pink[50],
           child: const Icon(Icons.edit),
         ),
       ),
@@ -94,10 +111,10 @@ class GoldDetailState extends State<GoldDetail> {
               controller.currentEditGold = controller.newGold;
               Navigator.pop(context, "Backbutton data");
             },
-            icon: const Icon(
+            icon: Icon(
               Icons.arrow_back_ios,
               size: 30,
-              color: Colors.white,
+              color: appBarIconColor,
             ),
           ),
         ),
@@ -112,8 +129,8 @@ class GoldDetailState extends State<GoldDetail> {
         ],
         title: Text(
           gold.name,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: appBarIconColor,
             fontSize: 19,
           ),
         ),
@@ -166,19 +183,19 @@ class GoldDetailState extends State<GoldDetail> {
               );
             });
           },
-          icon: const Icon(
+          icon: Icon(
             Icons.delete_forever_rounded,
             size: 30,
-            color: Colors.red,
+            color: appBarIconColor,
           )),
     );
   }
 
-  Widget sliverAppBarForPrice(String title, String value) {
+  Widget sliverAppBarForPrice(String title, String value, String color) {
     return SliverPadding(
       padding: const EdgeInsets.all(10),
       sliver: SliverAppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: appBarIconColor,
         automaticallyImplyLeading: false,
         expandedHeight: 50.0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -187,15 +204,19 @@ class GoldDetailState extends State<GoldDetail> {
           children: [
             _detailContainerUI(
               title,
-              Colors.black,
+              Colors.white,
               (ScreenSizeUtil.getScreenWidth(context) / 2) - 30,
               ServiceAction.none,
+              16,
+              FontWeight.bold,
             ),
             _detailContainerUI(
               value,
-              Colors.black,
+              Colors.white,
               (ScreenSizeUtil.getScreenWidth(context) / 2) - 30,
               ServiceAction.none,
+              15,
+              FontWeight.w400,
             ),
           ],
         ),
@@ -203,7 +224,7 @@ class GoldDetailState extends State<GoldDetail> {
     );
   }
 
-  SliverList sliverListCard(TextTheme textTheme, Widget widget) {
+  SliverList sliverListCard(Widget widget, String color) {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (context, index) {
@@ -217,6 +238,7 @@ class GoldDetailState extends State<GoldDetail> {
               elevation: 4.0,
               margin: const EdgeInsets.all(10),
               shadowColor: Colors.black12,
+              color: appBarIconColor,
               child: widget,
             ),
           );
@@ -233,11 +255,16 @@ class GoldDetailState extends State<GoldDetail> {
         child: Text(
           'About',
           textAlign: TextAlign.start,
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
       initiallyExpanded: true,
       children: [
+        const DottedLine(
+          dashColor: Colors.white,
+          lineThickness: 1,
+          dashLength: 6,
+        ),
         goldDetailRow('Phone No.', gold.phoneNo, ServiceAction.phone),
         goldDetailRow('Facebook', gold.facebook, ServiceAction.facebook),
         goldDetailRow('Website', gold.website, ServiceAction.website),
@@ -250,34 +277,27 @@ class GoldDetailState extends State<GoldDetail> {
   Widget goldDetailRow(key, value, ServiceAction action) {
     return Container(
       margin: const EdgeInsets.all(4.0),
-      height: 55,
-      decoration: BoxDecoration(
-        color: grey300,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+      padding: const EdgeInsets.only(left: 2.0),
+      height: 60,
+      width: double.infinity,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _detailContainerUI(
             key,
             Colors.grey.shade700,
             (ScreenSizeUtil.getScreenWidth(context) / 3),
             ServiceAction.none,
-          ),
-          Text(
-            ":",
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey.shade700,
-              fontWeight: FontWeight.bold,
-            ),
+            16,
+            FontWeight.w500,
           ),
           _detailContainerUI(
             value,
-            action == ServiceAction.none ? Colors.black : Colors.blue,
+            action == ServiceAction.none ? Colors.white : Colors.blue[600],
             (ScreenSizeUtil.getScreenWidth(context) / 2),
             action,
+            15,
+            FontWeight.w400,
           ),
         ],
       ),
@@ -285,7 +305,13 @@ class GoldDetailState extends State<GoldDetail> {
   }
 
   Widget _detailContainerUI(
-      String value, Color? color, double? width, ServiceAction action) {
+    String value,
+    Color? color,
+    double? width,
+    ServiceAction action,
+    double titleFontSize,
+    FontWeight fontWeight,
+  ) {
     return InkWell(
       onTap: () async {
         switch (action) {
@@ -310,14 +336,14 @@ class GoldDetailState extends State<GoldDetail> {
         }
       },
       child: Container(
-        padding: const EdgeInsets.all(7),
-        width: width,
+        padding: const EdgeInsets.all(3),
+        // width: width,
         child: Text(
           value,
           style: TextStyle(
-            fontSize: 16,
+            fontSize: titleFontSize,
             color: color,
-            fontWeight: FontWeight.bold,
+            fontWeight: fontWeight,
           ),
         ),
       ),

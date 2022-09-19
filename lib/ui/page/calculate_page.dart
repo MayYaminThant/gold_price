@@ -1,5 +1,6 @@
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
+import '../../common/common_widget.dart';
 import '../../controller/calculate_page_controller.dart';
 import '../../model/calculating_gold.dart';
 import '../../util/common_util.dart';
@@ -21,6 +22,16 @@ class CalculatePageState extends State<CalculatePage> {
   final TextEditingController _kyatTextController = TextEditingController();
   final TextEditingController _paeTextController = TextEditingController();
   final TextEditingController _ywayTextController = TextEditingController();
+
+  @override
+  void dispose() {
+    _mainGoldPriceTextController.dispose();
+    _calculatedGoldPriceTextController.dispose();
+    _kyatTextController.dispose();
+    _paeTextController.dispose();
+    _ywayTextController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -355,10 +366,11 @@ class CalculatePageState extends State<CalculatePage> {
           padding: const EdgeInsets.only(left: 22.0, top: 3, bottom: 5),
           child: Text(
             title,
-            style: const TextStyle(
-                color: Color.fromRGBO(21, 76, 121, 1),
-                fontSize: 18,
-                letterSpacing: 1),
+            style: TextStyle(
+              color: textHeaderSizeColor,
+              fontSize: 18,
+              letterSpacing: 1,
+            ),
           ),
         ),
         const DottedLine(
