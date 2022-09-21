@@ -346,7 +346,7 @@ class GoldShopController with ChangeNotifier {
     FocusManager.instance.primaryFocus?.unfocus();
     Map<String, dynamic> insertData = Map<String, dynamic>.from(data);
     if (!isInsertedImage) {
-      insertData.remove('imageUrl');
+      insertData.remove('imageUrl');s
     }
 
     FirebaseFirestore.instance
