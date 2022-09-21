@@ -88,7 +88,6 @@ class MainPageState extends State<MainPage> {
                 onTap: (position) {
                   Gold currentGold = goldController.currentEditGold;
                   if (controller.selectedIndex == 1 &&
-                      goldController.isEditing &&
                       currentGold.id != '0' &&
                       currentGold.id != '') {
                     _showWarningDialog(

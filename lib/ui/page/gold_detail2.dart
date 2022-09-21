@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:gold_price/util/intl_util.dart';
 import 'package:provider/provider.dart';
 
 import '../../common/color_extension.dart';
@@ -9,7 +10,9 @@ import '../../controller/bottom_nav_controller.dart';
 import '../../controller/gold_shop_controller.dart';
 import '../../model/gold.dart';
 import '../../util/common_util.dart';
+import '../../util/image_util.dart';
 import 'gold_detail.dart';
+import 'main_page.dart';
 
 class GoldDetail2 extends StatefulWidget {
   const GoldDetail2({super.key});
@@ -19,13 +22,11 @@ class GoldDetail2 extends StatefulWidget {
 }
 
 class _GoldDetail2State extends State<GoldDetail2> {
-  final TextEditingController titleController = TextEditingController();
   final TextEditingController pswController = TextEditingController();
   final GlobalKey<FormState> _keyDialogForm = GlobalKey<FormState>();
   late Gold gold;
   @override
   void dispose() {
-    titleController.dispose();
     pswController.dispose();
     super.dispose();
   }
@@ -41,6 +42,26 @@ class _GoldDetail2State extends State<GoldDetail2> {
       backgroundColor: ColorExtension.fromHex('#DE8573'),
       appBar: _appBar(),
       body: _body(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showConfirmationDialog(
+            context,
+            _keyDialogForm,
+            'Input your gold shop password',
+            'Enter Your Password',
+            submittedCallback: (text) {
+              pswController.text = text;
+              goToGoldEditorPage(gold);
+            },
+            cancelCallback: () {
+              pswController.text = "";
+              Navigator.pop(context);
+            },
+          );
+        },
+        backgroundColor: const Color.fromRGBO(160, 50, 50, 1),
+        child: const Icon(Icons.edit),
+      ),
     );
   }
 
@@ -58,8 +79,16 @@ class _GoldDetail2State extends State<GoldDetail2> {
             },
             icon: const Icon(
               Icons.arrow_back_ios,
-              size: 30,
             ),
+          ),
+        ),
+      ),
+      title: Center(
+        child: Text(
+          gold.name,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 25,
           ),
         ),
       ),
@@ -74,17 +103,36 @@ class _GoldDetail2State extends State<GoldDetail2> {
       padding:
           const EdgeInsets.only(left: 20.0, right: 12, top: 30, bottom: 10),
       child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              gold.name,
-              style: const TextStyle(
+            _detailContainerUI(
+                'အခေါက်ရွှေဈေး ( ${IntlUtils.formatPrice(gold.sixteenPrice)} )',
                 color: Colors.white,
-                fontSize: 25,
+                action: ServiceAction.none,
+                textFontSize: 17,
+                fontWeight: FontWeight.normal,
+                fontStyle: FontStyle.normal),
+            const SizedBox(height: 4),
+            _detailContainerUI(
+                '15 ပဲရည် ( ${IntlUtils.formatPrice(gold.fifteenPrice)} ) ',
+                color: Colors.white,
+                action: ServiceAction.none,
+                textFontSize: 17,
+                fontWeight: FontWeight.normal,
+                fontStyle: FontStyle.normal),
+            const SizedBox(height: 30),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Image.network(
+                gold.imageUrl,
+                fit: BoxFit.fitWidth,
+                width: double.infinity,
+                errorBuilder: (_, __, ___) => getErrorImage(context),
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 30),
             if (gold.phoneNo.isNotEmpty)
               _detailContainerUI(gold.phoneNo,
                   color: Colors.white54,
@@ -92,7 +140,7 @@ class _GoldDetail2State extends State<GoldDetail2> {
                   textFontSize: 16,
                   fontWeight: FontWeight.normal,
                   fontStyle: FontStyle.italic),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             if (gold.facebook.isNotEmpty)
               _detailContainerUI(gold.facebook,
                   color: Colors.white54,
@@ -100,7 +148,7 @@ class _GoldDetail2State extends State<GoldDetail2> {
                   textFontSize: 16,
                   fontWeight: FontWeight.normal,
                   fontStyle: FontStyle.italic),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             if (gold.website.isNotEmpty)
               _detailContainerUI(gold.website,
                   color: Colors.white54,
@@ -108,6 +156,14 @@ class _GoldDetail2State extends State<GoldDetail2> {
                   textFontSize: 16,
                   fontWeight: FontWeight.normal,
                   fontStyle: FontStyle.italic),
+            const SizedBox(height: 8),
+            _detailContainerUI('Update by ${gold.modifiedDate}',
+                color: Colors.white54,
+                action: ServiceAction.none,
+                textFontSize: 16,
+                fontWeight: FontWeight.normal,
+                fontStyle: FontStyle.normal),
+            const SizedBox(height: 27),
           ],
         ),
       ),
@@ -118,99 +174,42 @@ class _GoldDetail2State extends State<GoldDetail2> {
     return Consumer<GoldShopController>(
       builder: (_, controller, __) => IconButton(
           onPressed: () {
-            _showPasswordConfirmationDialog(submittedCallback: () {
-              controller.deleteGoldData(
-                gold.id,
-                successCallback: () {
-                  Navigator.pop(context);
-                  showSimpleSnackBar(
-                    context,
-                    'Delete Successful',
-                    Colors.green.shade200,
-                  );
-                },
-                failureCallback: (dynamic error) {
-                  Navigator.pop(context);
-                  showSimpleSnackBar(
-                    context,
-                    'Delete Failed: $error',
-                    Colors.green.shade200,
-                  );
-                },
-              );
-            });
+            showConfirmationDialog(
+              context,
+              _keyDialogForm,
+              'Input your gold shop password',
+              'Enter Your Password',
+              submittedCallback: (text) {
+                pswController.text = text;
+                controller.deleteGoldData(
+                  gold.id,
+                  successCallback: () {
+                    Navigator.pop(context);
+                    showSimpleSnackBar(
+                      context,
+                      'Delete Successful',
+                      Colors.green.shade200,
+                    );
+                  },
+                  failureCallback: (dynamic error) {
+                    Navigator.pop(context);
+                    showSimpleSnackBar(
+                      context,
+                      'Delete Failed: $error',
+                      Colors.green.shade200,
+                    );
+                  },
+                );
+              },
+              cancelCallback: () {
+                pswController.text = "";
+                Navigator.pop(context);
+              },
+            );
           },
           icon: const Icon(
             Icons.delete_forever_rounded,
-            size: 30,
           )),
-    );
-  }
-
-  Future _showPasswordConfirmationDialog(
-      {required VoidCallback submittedCallback}) {
-    return showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Form(
-            key: _keyDialogForm,
-            child: Column(
-              children: <Widget>[
-                const Text(
-                  'Input your gold shop password',
-                  style: TextStyle(fontSize: 17.5),
-                ),
-                TextFormField(
-                  autofocus: true,
-                  controller: pswController,
-                  decoration: const InputDecoration(
-                    focusedErrorBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blue),
-                    ),
-                    errorBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.blue),
-                    ),
-                    // errorStyle: TextStyle(color: Colors.blue),
-                  ),
-                  maxLength: 8,
-                  textAlign: TextAlign.center,
-                  onSaved: (val) {
-                    if (val != null && val.isNotEmpty) {
-                      titleController.text = val;
-                    }
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Enter Your Password';
-                    }
-
-                    return null;
-                  },
-                  textInputAction: TextInputAction.done,
-                  onFieldSubmitted: (String text) {
-                    submittedCallback.call();
-                  },
-                )
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            ElevatedButton(
-              onPressed: () {
-                submittedCallback.call();
-              },
-              child: const Text('Confirm'),
-            ),
-            ElevatedButton(
-                onPressed: () {
-                  pswController.text = "";
-                  Navigator.pop(context);
-                },
-                child: const Text('Cancel')),
-          ],
-        );
-      },
     );
   }
 
@@ -257,5 +256,38 @@ class _GoldDetail2State extends State<GoldDetail2> {
                 : TextDecoration.underline)),
       ),
     );
+  }
+
+  void goToGoldEditorPage(Gold gold) {
+    if (_keyDialogForm.currentState != null &&
+        _keyDialogForm.currentState!.validate()) {
+      _keyDialogForm.currentState!.save();
+
+      GoldShopController.checkGoldPassword(
+        gold.id,
+        pswController.text,
+        () {
+          pswController.text = "";
+          Navigator.pop(context);
+          context.read<BottomNavController>().selectedIndex = 1;
+          context.read<GoldShopController>().currentEditGold = gold;
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) {
+                return const MainPage();
+              },
+            ),
+          );
+        },
+        () {
+          var psw = pswController.text;
+          pswController.text = "";
+          showSimpleSnackBar(
+              context, "Your password($psw) is invalid!", Colors.red);
+          Navigator.pop(context);
+        },
+      );
+    }
   }
 }

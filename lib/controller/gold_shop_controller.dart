@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:gold_price/controller/authorization_controller.dart';
 import '../../model/gold.dart';
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -265,7 +266,17 @@ class GoldShopController with ChangeNotifier {
 
   setFilterGoldLst() {
     if (searchTerm.isEmpty) {
-      _filterGoldShopLst = _goldShopLst;
+      for (Gold gold in _goldShopLst) {
+        if (_filterGoldShopLst.isEmpty) {
+          _filterGoldShopLst.add(gold);
+        } else if (_filterGoldShopLst.isNotEmpty) {
+          final existGold = _filterGoldShopLst.where(
+              (Gold g) => g.name.toLowerCase() == gold.name.toLowerCase());
+          if (existGold.isEmpty) {
+            _filterGoldShopLst.add(gold);
+          }
+        }
+      }
     } else {
       _filterGoldShopLst = [];
       notifyListeners();
@@ -315,6 +326,7 @@ class GoldShopController with ChangeNotifier {
       if (isUpdatedImage) {
         data['imageUrl'] = imageDownloadUrl;
       }
+      data['id'] = id;
       currentEditGold = Gold.fromFirebase(data);
       successCallback?.call();
       getGoldShopData();
@@ -327,8 +339,8 @@ class GoldShopController with ChangeNotifier {
     );
   }
 
-  insertGoldData(
-      Map<String, dynamic> data, bool isInsertedImage, String imageDownloadUrl,
+  insertGoldData(Map<String, dynamic> data, bool isInsertedImage,
+      String imageDownloadUrl, String authorizedKey,
       {VoidCallback? successCallback,
       Function(dynamic error)? failureCallback}) {
     FocusManager.instance.primaryFocus?.unfocus();
@@ -341,6 +353,8 @@ class GoldShopController with ChangeNotifier {
         .collection('goldShop')
         .add(data)
         .then((documentSnapshot) {
+      AuthorizationController.updateAuthorizationCount(authorizedKey);
+
       updateGoldData(
         documentSnapshot.id,
         {"id": documentSnapshot.id},
@@ -377,8 +391,12 @@ class GoldShopController with ChangeNotifier {
     );
   }
 
-  void fetchInsertOrUpdateGold(Gold? gold, Map<String, dynamic> data,
-      bool isInsertedOrUpdatedImage, String imageDownloadUrl,
+  void fetchInsertOrUpdateGold(
+      Gold? gold,
+      Map<String, dynamic> data,
+      bool isInsertedOrUpdatedImage,
+      String imageDownloadUrl,
+      String authorizedKey,
       {VoidCallback? successCallback,
       Function(dynamic error)? failureCallback}) {
     if (gold == null || gold.id.isEmpty || gold.id == '0') {
@@ -386,6 +404,7 @@ class GoldShopController with ChangeNotifier {
         data,
         isInsertedOrUpdatedImage,
         imageDownloadUrl,
+        authorizedKey,
         successCallback: successCallback,
         failureCallback: failureCallback,
       );
@@ -405,6 +424,7 @@ class GoldShopController with ChangeNotifier {
     BuildContext context,
     ImageSource source,
     GoldShopController controller,
+    bool isAuthorizedUser,
   ) async {
     try {
       XFile? pickedFile = await ImagePicker().pickImage(
@@ -413,7 +433,9 @@ class GoldShopController with ChangeNotifier {
       if (pickedFile != null) {
         File imageFile = File(pickedFile.path);
         pickedImageFile = imageFile;
-        isEditing = true;
+        if (isAuthorizedUser) {
+          isEditing = true;
+        }
       }
     } catch (err) {
       if (kDebugMode) {

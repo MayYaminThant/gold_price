@@ -133,3 +133,70 @@ typedef GetGoldCallBack = void Function(Gold gold);
 Color get textHeaderSizeColor => const Color.fromRGBO(21, 76, 121, 1);
 
 Color get appBarIconColor => ColorExtension.fromHex(colors[10]);
+
+Future showConfirmationDialog(BuildContext context,
+    GlobalKey<FormState> keyDialogForm, String header, String errorMsg,
+    {required Function(String) submittedCallback,
+    required VoidCallback cancelCallback,
+    int maxLength = 8}) {
+  TextEditingController textEditingController = TextEditingController();
+  return showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Form(
+          key: keyDialogForm,
+          child: Column(
+            children: <Widget>[
+              Text(
+                header,
+                style: const TextStyle(fontSize: 17.5),
+              ),
+              TextFormField(
+                autofocus: true,
+                controller: textEditingController,
+                decoration: const InputDecoration(
+                  focusedErrorBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue),
+                  ),
+                  errorBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue),
+                  ),
+                ),
+                maxLength: maxLength,
+                textAlign: TextAlign.center,
+                onSaved: (val) {
+                  if (val != null && val.isNotEmpty) {}
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return errorMsg;
+                  }
+
+                  return null;
+                },
+                textInputAction: TextInputAction.done,
+                onFieldSubmitted: (String text) {
+                  submittedCallback(textEditingController.text);
+                },
+              )
+            ],
+          ),
+        ),
+        actions: <Widget>[
+          ElevatedButton(
+            onPressed: () {
+              submittedCallback(textEditingController.text);
+            },
+            child: const Text('Confirm'),
+          ),
+          ElevatedButton(
+              onPressed: () {
+                cancelCallback();
+              },
+              child: const Text('Cancel')),
+        ],
+      );
+    },
+  );
+}

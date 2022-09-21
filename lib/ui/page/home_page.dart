@@ -5,6 +5,7 @@ import '../../common/common_widget.dart';
 import '../../controller/gold_shop_controller.dart';
 import '../../model/gold.dart';
 import '../../ui/page/gold_detail.dart';
+import '../../util/intl_util.dart';
 import '../../util/screen_util.dart';
 import 'package:provider/provider.dart';
 
@@ -156,8 +157,10 @@ class HomePageState extends State<HomePage> {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              gridTileBar('16', gold.sixteenPrice, colorPr), // ပဲရည်
-              gridTileBar('15', gold.fifteenPrice, colorPr),
+              gridTileBar('အခေါက်', IntlUtils.formatPrice(gold.sixteenPrice),
+                  colorPr), // ပဲရည်
+              gridTileBar('15 ပဲရည်', IntlUtils.formatPrice(gold.fifteenPrice),
+                  colorPr),
             ],
           ),
         ),
@@ -168,7 +171,7 @@ class HomePageState extends State<HomePage> {
   GridTileBar gridTileBar(String goldType, String? price, Color colorPr) {
     return GridTileBar(
       leading: Container(
-        padding: const EdgeInsets.all(4),
+        padding: const EdgeInsets.only(top: 4, bottom: 4, right: 10, left: 10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(15),
           color: colorPr,
@@ -176,7 +179,7 @@ class HomePageState extends State<HomePage> {
         child: Text(
           goldType,
           textAlign: TextAlign.center,
-          style: const TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white, fontSize: 12),
         ),
       ),
       title: Text(

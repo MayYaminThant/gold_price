@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:gold_price/controller/authorization_controller.dart';
 import '../../common/common_widget.dart';
 import '../../controller/bottom_nav_controller.dart';
 import '../../controller/gold_shop_controller.dart';
@@ -33,7 +34,12 @@ class GoldEditorPageState extends State<GoldEditorPage> {
   final TextEditingController _modifiedDateTextController =
       TextEditingController();
   final TextEditingController _pswTextController = TextEditingController();
+
+  final TextEditingController _authorizationController =
+      TextEditingController();
+  final GlobalKey<FormState> _keyDialogForm = GlobalKey<FormState>();
   Gold? gold;
+  bool isAuthorizedUser = false;
 
   @override
   void dispose() {
@@ -46,6 +52,7 @@ class GoldEditorPageState extends State<GoldEditorPage> {
     _createdDateTextController.dispose();
     _modifiedDateTextController.dispose();
     _pswTextController.dispose();
+    _authorizationController.dispose();
     super.dispose();
   }
 
@@ -62,13 +69,28 @@ class GoldEditorPageState extends State<GoldEditorPage> {
       _createdDateTextController.text = gold?.createdDate ?? '';
       _modifiedDateTextController.text = gold?.modifiedDate ?? '';
       _pswTextController.text = gold?.goldShopPassword ?? '';
+
+      if (gold!.id.isEmpty || gold!.id == '0' || gold!.id == '') {
+        context.read<GoldShopController>().isEditing = isAuthorizedUser;
+      } else {
+        isAuthorizedUser = true;
+      }
     });
     return SafeArea(
         child: WillPopScope(
       onWillPop: () => Future.value(false),
-      child: Consumer<GoldShopController>(
-        builder: (_, controller, __) => Scaffold(
-          body: _mainBody(),
+      child: Scaffold(
+        body: Consumer<GoldShopController>(
+          builder: (_, controller, __) => _mainBody(),
+        ),
+        floatingActionButton: Visibility(
+          visible: !isAuthorizedUser,
+          child: FloatingActionButton.extended(
+            onPressed: () {
+              _checkAndValidateAuthorization();
+            },
+            label: const Text('Register'),
+          ),
         ),
       ),
     ));
@@ -317,7 +339,9 @@ class GoldEditorPageState extends State<GoldEditorPage> {
           focusedBorder: _focusedBorderTextFormField(),
         ),
         onChanged: (value) {
-          goldcontroller.isEditing = true;
+          if (isAuthorizedUser) {
+            goldcontroller.isEditing = true;
+          }
         },
       ),
     );
@@ -341,7 +365,9 @@ class GoldEditorPageState extends State<GoldEditorPage> {
             focusedBorder: _focusedBorderTextFormField(),
           ),
           onChanged: (value) {
-            goldcontroller.isEditing = true;
+            if (isAuthorizedUser) {
+              goldcontroller.isEditing = true;
+            }
           },
         ),
       ),
@@ -446,6 +472,7 @@ class GoldEditorPageState extends State<GoldEditorPage> {
           },
           goldShopController.pickedImageFile != null,
           imageDownloadUrl,
+          _authorizationController.text,
           successCallback: () {
             showSimpleSnackBar(
               context,
@@ -453,6 +480,10 @@ class GoldEditorPageState extends State<GoldEditorPage> {
               Colors.green.shade200,
             );
             goldShopController.isEditing = false;
+            if (goldShopController.pickedImageFile != null) {
+              gold?.imageUrl = goldShopController.currentEditGold.imageUrl;
+            }
+            goldShopController.pickedImageFile = null;
           },
           failureCallback: (dynamic error) {
             showSimpleSnackBar(
@@ -527,7 +558,7 @@ class GoldEditorPageState extends State<GoldEditorPage> {
     ImageSource source,
     GoldShopController controller,
   ) async {
-    controller.pickImage(context, source, controller);
+    controller.pickImage(context, source, controller, isAuthorizedUser);
     Navigator.pop(context);
   }
 
@@ -539,28 +570,68 @@ class GoldEditorPageState extends State<GoldEditorPage> {
       ),
     );
   }
-}
 
-Widget colorBuilderContainer(GoldShopController controller, int index) {
-  return InkWell(
-    onTap: () {
-      if (colors[index].isNotEmpty) {
-        controller.currentEditGold.color = colors[index];
-        controller.isEditing = true;
-        controller.refreshData();
-      }
-    },
-    child: Container(
-        height: 40,
-        width: 55,
-        margin: const EdgeInsets.all(5),
-        decoration: BoxDecoration(
-            color: ColorExtension.fromHex(colors[index]),
-            borderRadius: BorderRadius.circular(40)),
-        child: ((controller.currentEditGold.color.isEmpty && index == 0) ||
-                (controller.currentEditGold.color != "" &&
-                    controller.currentEditGold.color == colors[index]))
-            ? const Icon(Icons.check)
-            : const SizedBox()),
-  );
+  _checkAndValidateAuthorization() {
+    showConfirmationDialog(
+      context,
+      _keyDialogForm,
+      'Input your authorization key',
+      'Enter your authorization key',
+      maxLength: 50,
+      submittedCallback: (text) async {
+        _authorizationController.text = text;
+        int? count = await AuthorizationController.getAuthorization(
+            _authorizationController.text);
+
+        if (!mounted) return;
+        if (count == 0) {
+          isAuthorizedUser = true;
+          setState(() {});
+        } else {
+          String errorMsg;
+          if (count == null) {
+            errorMsg =
+                'Please check your key. There is no registration with your key!';
+          } else {
+            errorMsg =
+                'The number of permissions for your key has been exceeded. Please contace the admistrator!';
+          }
+
+          showSimpleSnackBar(context, errorMsg, Colors.red);
+        }
+        Navigator.pop(context);
+      },
+      cancelCallback: () {
+        if (!mounted) return;
+        _authorizationController.text = "";
+        Navigator.of(context).pop(false);
+        context.read<BottomNavController>().selectedIndex = 0;
+      },
+    );
+  }
+
+  Widget colorBuilderContainer(GoldShopController controller, int index) {
+    return InkWell(
+      onTap: () {
+        if (colors[index].isNotEmpty && isAuthorizedUser) {
+          controller.currentEditGold.color = colors[index];
+
+          controller.isEditing = true;
+          controller.refreshData();
+        }
+      },
+      child: Container(
+          height: 40,
+          width: 55,
+          margin: const EdgeInsets.all(5),
+          decoration: BoxDecoration(
+              color: ColorExtension.fromHex(colors[index]),
+              borderRadius: BorderRadius.circular(40)),
+          child: ((controller.currentEditGold.color.isEmpty && index == 0) ||
+                  (controller.currentEditGold.color != "" &&
+                      controller.currentEditGold.color == colors[index]))
+              ? const Icon(Icons.check)
+              : const SizedBox()),
+    );
+  }
 }
